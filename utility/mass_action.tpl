@@ -64,7 +64,7 @@ function preparePreview() {
         grid.setDataBlob(res);
         grid.setHeaders([
          {name: 'Date Submitted', indicatorID: 'date', editable: false, callback: function(data, blob) {
-             var date = new Date(blob[data.recordID].date * 1000);
+             var date = new Date(blob[data.recordID].submitted * 1000);
              var now = new Date();
              var year = now.getFullYear() != date.getFullYear() ? ' ' + date.getFullYear() : '';
              var formattedDate = months[date.getMonth()] + ' ' + parseFloat(date.getDate()) + year;

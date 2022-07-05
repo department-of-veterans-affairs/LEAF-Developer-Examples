@@ -1,4 +1,4 @@
-<script src="./files/intervalQueue.js"></script>
+<script src="../libs/js/LEAF/intervalQueue.js"></script>
 <script>
 var functionDescription = "Apply workflow action";
 

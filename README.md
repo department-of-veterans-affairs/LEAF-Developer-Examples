@@ -1,4 +1,4 @@
-# LEAF-Developer-Examples
-List of example code snippets for LEAF Developers
+# LEAF Developer Examples
+:warning:___Important note for contributors: This is a public space. Do not store sensitive information in this repository!___:warning:
 
-___Important note for contributors: This is a public space. Do not store sensitive information in this repository!___
+This repository contains examples and guidance for developers who plan on implementing custom user experiences using LEAF.

@@ -1,0 +1,55 @@
+<script>
+function renderResult(tag) {
+    tag = tag || '';
+
+    let buf = `<table class="table"><thead>
+    	<td>ID</td>
+		<td>Name</td>
+        <td>Tags</td>
+    </thead><tbody>`;
+    groups.forEach(group => {
+        let tags = '';
+        for(let i in group.tags) {
+            tags += group.tags[i] + ' ';
+        }
+        tags = tags.trim();
+        
+        if(tag.length == 0 || tags.indexOf(tag) != -1) {
+            buf += `<tr>
+                <td>${group.groupID}</td>
+                <td>${group.groupTitle}</td>
+                <td>${tags}</td>
+            </tr>`;
+        }
+   
+    });
+    buf += '</tbody></table>';
+    document.querySelector('#results').innerHTML = buf;
+}
+var groups;
+async function main() {
+	groups = await fetch('<!--{$orgchartPath}-->/api/group/search&q=*&noLimit=1').then(res => res.json());
+    renderResult();
+    
+    document.querySelector('#tag').addEventListener('keyup', function() {
+    	renderResult(document.querySelector('#tag').value);
+    });
+    
+    document.querySelector('#progressContainer').style.display = 'none';
+    document.querySelector('#output').style.visibility = 'visible';
+}
+
+document.addEventListener('DOMContentLoaded', main);
+</script>
+
+<h1>Group Tag Explorer</h1>
+
+<div id="progressContainer" style="width: 50%; border: 1px solid black; background-color: white; margin: auto; padding: 16px">
+    <h1 style="text-align: center"><img src="images/largespinner.gif" style="vertical-align: middle" /> Loading...</h1>
+    <div id="loadingMessage"></div>
+</div>
+
+<div id="output" style="visibility: hidden">
+    <p>Search Tag: <input id="tag" type="text" /></p>
+    <div id="results"></div>
+</div>

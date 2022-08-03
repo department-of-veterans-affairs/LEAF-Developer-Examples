@@ -1,3 +1,8 @@
+<style>
+#content {
+	padding: 0 1rem;
+}
+</style>
 <script>
 function renderResult(tag) {
     tag = tag || '';
@@ -16,7 +21,7 @@ function renderResult(tag) {
         
         if(tag.length == 0 || tags.indexOf(tag) != -1) {
             buf += `<tr>
-                <td>${group.groupID}</td>
+                <td><a href="<!--{$orgchartPath}-->/?a=view_group&groupID=${group.groupID}">${group.groupID}</a></td>
                 <td>${group.groupTitle}</td>
                 <td>${tags}</td>
             </tr>`;

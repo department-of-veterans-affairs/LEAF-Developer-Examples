@@ -2,6 +2,15 @@
 
 This replaces the normal group search with a dropdown list of groups who are associated with a group tag.
 
+Prerequisites:
+1. Input format must be set to "raw_data".
+
+Known issues:
+1. Orgchart path is hardcoded
+2. Alert for required field is not triggered. However the restriction to submit an incomplete request is still in place.
+
+
+## html
 ```js
 <div id="groupDropdown_loadIndicator{{ iID }}"><img src="images/indicator.gif" /> Loading</div>
 <select id="groupDropdown_{{ iID }}" style="display: none">
@@ -33,6 +42,23 @@ $(function () {
             $('#groupDropdown_{{ iID }}').css('display', 'inline');
         },
         cache: false
+    });
+});
+</script>
+```
+
+## htmlPrint
+```js
+<span id="group_{{ iID }}" class="printResponse"></span>
+<script>
+$(function() {
+  	$.ajax({
+    	type: 'GET',
+      	url: '../orgchart/api/group/{{ data }}',
+    }).then(res => {
+    	if(res.title != undefined) {
+          $('#group_{{ iID }}').html(res.title);
+        }
     });
 });
 </script>

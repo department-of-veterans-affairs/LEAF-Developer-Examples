@@ -7,7 +7,7 @@
 var emailFieldID = 3770;
 
 function renderWidget_{{ iID }}() {
-    let empSel = new employeeSelector('empSel_{{ iID }}');
+    let empSel = new nationalEmployeeSelector('empSel_{{ iID }}');
     empSel.apiPath = '../orgchart/api/';
     empSel.rootPath = '../orgchart/';
     empSel.setSelectHandler(function(id) {
@@ -20,7 +20,7 @@ if(typeof nationalEmployeeSelector == 'undefined') {
     $('head').append('<link type="text/css" rel="stylesheet" href="../orgchart/css/employeeSelector.css" />');
     $.ajax({
         type: 'GET',
-        url: "../orgchart/js/employeeSelector.js",
+        url: "../orgchart/js/nationalEmployeeSelector.js",
         dataType: 'script',
         success: function() {
             renderWidget_{{ iID }}();

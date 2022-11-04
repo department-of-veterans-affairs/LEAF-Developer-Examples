@@ -9,10 +9,11 @@ This replaces the normal employee search with a dropdown list of employees who a
 </select>
 <script>
 $(function () {
-    let groupID = "419";
+    let groupID = "105";
     
-  	$('#loadingIndicator_{{ iID }}').css('display', 'none');
-    $('#empSel_{{ iID }}').css('display', 'none');
+    leaf_employeeSelector[{{ iID }}].then(empSel => {
+        empSel.disableSearch();
+    });
     
     $('#empDropdown_{{ iID }}').on('change', function() {
         let mySelection = $('#empDropdown_{{ iID }}').val();
@@ -22,6 +23,7 @@ $(function () {
         type: 'GET',
         url: `./api/group/${groupID}/members`,
         success: function(res) {
+            $('#empDropdown_{{ iID }}').append('<option value="">Select an option</option>');
             for(let i in res) {
                 $('#empDropdown_{{ iID }}').append(`<option value="${res[i].empUID}">${res[i].lastName}, ${res[i].firstName} ${res[i].middleName}</option>`);
             }

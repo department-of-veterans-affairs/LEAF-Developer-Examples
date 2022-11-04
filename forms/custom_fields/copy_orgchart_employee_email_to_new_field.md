@@ -6,30 +6,12 @@
 
 var emailFieldID = 3770;
 
-function renderWidget_{{ iID }}() {
-    let empSel = new nationalEmployeeSelector('empSel_{{ iID }}');
-    empSel.apiPath = '../orgchart/api/';
-    empSel.rootPath = '../orgchart/';
+$(async function() {
+	let empSel = await leaf_employeeSelector[{{ iID }}];
     empSel.setSelectHandler(function(id) {
-        $(`#${emailFieldID}`).val(empSel.selectionData[empSel.selection].data[6].data);
-    });
-    empSel.initialize();
-}
-
-if(typeof nationalEmployeeSelector == 'undefined') {
-    $('head').append('<link type="text/css" rel="stylesheet" href="../orgchart/css/employeeSelector.css" />');
-    $.ajax({
-        type: 'GET',
-        url: "../orgchart/js/nationalEmployeeSelector.js",
-        dataType: 'script',
-        success: function() {
-            renderWidget_{{ iID }}();
-        }
-    });
-}
-else {
-    renderWidget_{{ iID }}();
-}
+    	$(`#${emailFieldID}`).val(empSel.selectionData[empSel.selection].data[6].data);
+  	});
+});
   
 </script>
 ```

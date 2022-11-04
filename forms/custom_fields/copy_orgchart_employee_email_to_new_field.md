@@ -8,8 +8,8 @@ var emailFieldID = 3770;
 
 $(async function() {
 	let empSel = await leaf_employeeSelector[{{ iID }}];
-    empSel.setSelectHandler(function(id) {
-    	$(`#${emailFieldID}`).val(empSel.selectionData[empSel.selection].data[6].data);
+	empSel.setSelectHandler(function(id) {
+		$(`#${emailFieldID}`).val(empSel.selectionData[empSel.selection].data[6].data);
   	});
 });
   

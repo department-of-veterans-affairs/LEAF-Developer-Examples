@@ -33,7 +33,7 @@ Setup:
 
     // Read file and get existing data
     let results = await Promise.all([
-    	  fetch(`files/${myFile}`).then(res => res.text()),
+        fetch(`files/${myFile}`).then(res => res.text()),
         fetch(`api/form/{{ recordID }}/rawIndicator/{{ iID }}/1`).then(res => res.json())
     ]);
     let fileContent = results[0];

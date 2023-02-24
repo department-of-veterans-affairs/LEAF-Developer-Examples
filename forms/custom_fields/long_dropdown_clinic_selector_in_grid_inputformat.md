@@ -31,9 +31,10 @@ Setup:
     let myFile = "clinics.txt";
     let customColumnIndex = 0;
 
+    // Read file and get existing data
     let results = await Promise.all([
-    	fetch(`files/${myFile}`).then(res => res.text()),
-      	fetch(`api/form/{{ recordID }}/rawIndicator/{{ iID }}/1`).then(res => res.json())
+    	  fetch(`files/${myFile}`).then(res => res.text()),
+        fetch(`api/form/{{ recordID }}/rawIndicator/{{ iID }}/1`).then(res => res.json())
     ]);
     let fileContent = results[0];
     let data = results[1];    
@@ -41,6 +42,7 @@ Setup:
     // split the file into an array
     let lines = fileContent.split("\n").map(v => v.trim());
 
+    // Prepare dropdown
     let buffer = '';
     for(var i in lines) {
       buffer += '<option value="'+ lines[i] +'">'+ lines[i] +'</option>';

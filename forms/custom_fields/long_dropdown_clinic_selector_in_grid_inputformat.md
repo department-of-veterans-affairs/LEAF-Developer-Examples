@@ -1,6 +1,7 @@
 # Extra long list of Clinics in a Grid dropdown
 
 :warning: This customization modifies important templates and will require you to manually update and maintain them.
+:warning: The "Grid" input field has not been designed to accomodate customizations, and therefore may be subject to change.
 
 When a list becomes too long to include in a dropdown field, such as a list of clinics, a custom widget may be created.
 

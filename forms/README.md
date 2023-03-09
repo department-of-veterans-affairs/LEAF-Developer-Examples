@@ -31,7 +31,7 @@ POST api/form/new
   title           string (optional)
   priority        number (optional)
   ```
-#### Update the contents of a field within a record - [Example](https://github.com/department-of-veterans-affairs/LEAF-Developer-Examples/blob/master/forms/custom_fields/copy_orgchart_employee_seleciton_to_other_field.md)
+#### Update the contents of a field within a record - [Example](https://github.com/department-of-veterans-affairs/LEAF-Developer-Examples/blob/master/forms/custom_fields/copy_orgchart_employee_selection_to_other_field.md)
 POST api/form/[recordID]
   ```
   CSRFToken      string (required)

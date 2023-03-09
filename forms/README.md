@@ -25,6 +25,8 @@ POST api/form/new
   CSRFToken       string (required)
   numform_FORM_ID 1      (required) Replace FORM_ID with the form ID
   FIELD_ID        string (optional) Replace FIELD_ID with the field ID, used to prepopulate a record
+  ...
+  FIELD_ID                          Many FIELD_IDs can be added simultaneously
   service         number (optional) Service ID
   title           string (optional)
   priority        number (optional)
@@ -34,5 +36,7 @@ POST api/form/[recordID]
   ```
   CSRFToken      string (required)
   FIELD_ID       string (optional) Replace FIELD_ID with the field ID
+  ...
+  FIELD_ID                         Many FIELD_IDs can be added simultaneously
   ```
   Special considerations: The "grid" input format expects data to be formatted as in [this example](https://github.com/department-of-veterans-affairs/LEAF-Developer-Examples/blob/master/forms/update_grid_formatted_field.tpl).

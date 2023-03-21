@@ -1,5 +1,7 @@
 # Extra long list of Clinics in a Grid dropdown
 
+:red_circle: This is not functional and requires updates to the "Grid Input Format"
+
 :warning: This customization modifies important templates and will require you to manually update and maintain them.
 
 :warning: The "Grid" input field has not been designed to accomodate customizations, and therefore may be subject to change. You will need to maintain and update this.
@@ -61,7 +63,7 @@ Setup:
     
     // apply existing data
     rows.forEach((row, idx) => {
-    	if(data[{{ iID }}].value?.cells[idx][customColumnIndex] != undefined) {
+    	if(data[{{ iID }}].value?.cells?.[idx]?.[customColumnIndex] != undefined) {
           let cols = row.querySelectorAll('td');
       
           let dropdown = cols[customColumnIndex].querySelector('select');

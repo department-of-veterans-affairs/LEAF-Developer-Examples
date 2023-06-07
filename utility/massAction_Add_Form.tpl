@@ -1,0 +1,204 @@
+<script src="../libs/js/LEAF/intervalQueue.js"></script>
+<script>
+var formID = 'form_08f4f';
+var functionDescription = `Add ${formID} to records`;
+
+function runMassAction() {
+    let totalRecords = Object.keys(selectedRecords).length;
+
+    let queue = new intervalQueue();    // Create a queue to help facilitate processing mass actions
+    queue.setConcurrency(3);            // The browser maximum for network requests is typically 6. This affects how many of your functions can run simultaneously.
+    queue.setWorker(function(item) {    // This is executed for each record. Must return $.ajax or equivalent
+        document.querySelector('#functionStatus').innerHTML = `Processing ${queue.getLoaded()} of ${totalRecords} records`;
+
+        let data = {
+                CSRFToken: '<!--{$CSRFToken}-->',
+        };
+        data.category = formID;
+        
+        return $.ajax({
+            type: 'POST',
+            url: `./api/form/${item.recordID}/types/append`,
+            data: data
+        });
+    });
+    
+    queue.setOnWorkerError(function(item, reason) { // Errors can be logged here
+        console.log(`Error processing recordID: ${item.recordID}`);
+    });
+    
+    queue.onComplete(function() {
+        document.querySelector('#functionStatus').innerHTML = 'Complete';
+        return 'Complete';
+    });
+    
+    for(let i in selectedRecords) {
+        queue.push(selectedRecords[i]);
+    }
+    
+    queue.start();
+}
+
+function prelaunchCheck() {
+    dialog_confirm.setTitle('Pre-launch check...');
+    dialog_confirm.setContent(`Ready to run ${functionDescription} on <b>${Object.keys(selectedRecords).length}</b> records?`);
+    dialog_confirm.setSaveHandler(function() {
+        dialog_confirm.hide();
+        runMassAction();
+    });
+    dialog_confirm.show();
+    document.querySelector('#confirm_button_cancelchange').focus();
+}
+
+function ready(func) {
+    document.addEventListener("DOMContentLoaded", func);
+}
+
+var selectedRecords = {};
+function preparePreview() {
+    query.onSuccess(function(res) {
+        selectedRecords = res;
+        document.querySelector('#previewStatus').innerHTML = 'Preview of ' + Object.keys(res).length + ' total records';
+        
+        var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
+        var grid = new LeafFormGrid('previewGrid', {readOnly: true});
+        grid.setDataBlob(res);
+        grid.setHeaders([
+         {name: 'Date Submitted', indicatorID: 'date', editable: false, callback: function(data, blob) {
+             var date = new Date(blob[data.recordID].submitted * 1000);
+             var now = new Date();
+             var year = now.getFullYear() != date.getFullYear() ? ' ' + date.getFullYear() : '';
+             var formattedDate = months[date.getMonth()] + ' ' + parseFloat(date.getDate()) + year;
+             $('#'+data.cellContainerID).html(formattedDate);
+             if(blob[data.recordID].userID == "<!--{$userID|unescape|escape:'quotes'}-->") {
+                 $('#'+data.cellContainerID).css('background-color', '#feffd1');
+             }
+         }},
+         {name: 'Title', indicatorID: 'title', editable: false, callback: function(data, blob) {
+            $('#'+data.cellContainerID).html(blob[data.recordID].title);
+         }},
+         /*{name: 'Service', indicatorID: 'service', editable: false, callback: function(data, blob) {
+             $('#'+data.cellContainerID).html(blob[data.recordID].service);
+             if(blob[data.recordID].userID == '<!--{$userID|unescape|escape:'quotes'}-->') {
+                 $('#'+data.cellContainerID).css('background-color', '#feffd1');
+             }
+         }},*/
+         {name: 'Status', indicatorID: 'currentStatus', editable: false, callback: function(data, blob) {
+             var waitText = blob[data.recordID].blockingStepID == 0 ? 'Pending ' : 'Waiting for ';
+             var status = '';
+             if(blob[data.recordID].stepID == null && blob[data.recordID].submitted == '0') {
+                 status = '<span style="color: #e00000">Not Submitted</span>';
+             }
+             else if(blob[data.recordID].stepID == null) {
+                 var lastStatus = blob[data.recordID].lastStatus;
+                 if(lastStatus == '') {
+                     lastStatus = '<a href="index.php?a=printview&recordID='+ data.recordID +'">Check Status</a>';
+                 }
+                 status = '<span style="font-weight: bold">' + lastStatus + '</span>';
+             }
+             else {
+                 status = waitText + blob[data.recordID].stepTitle;
+             }
+
+             if(blob[data.recordID].deleted > 0) {
+                 status += ', Cancelled';
+             }
+
+             $('#'+data.cellContainerID).html(status);
+             if(blob[data.recordID].userID == '<!--{$userID|unescape|escape:'quotes'}-->') {
+                 $('#'+data.cellContainerID).css('background-color', '#feffd1');
+             }
+         }}
+         ]);
+
+        var tGridData = [];
+        for(var i in res) {
+            tGridData.push(res[i]);
+        }
+        grid.setData(tGridData);
+        //grid.sort('recordID', 'desc');
+        grid.renderBody();
+        grid.announceResults();
+
+        $('#header_date').css('width', '60px');
+        $('#header_service').css('width', '150px');
+        $('#header_currentStatus').css('width', '100px');
+
+    });
+    
+    let leafSearch = new LeafFormSearch('searchContainer');
+    leafSearch.setSearchFunc(search => {
+        try {
+            leafSearchTerms = $.parseJSON(search);
+        }
+        catch(err) {
+            return;
+        }
+        
+        generateQuery(leafSearchTerms);
+
+        query.execute();
+    });
+    leafSearch.init();
+    document.querySelector('#'+ leafSearch.getPrefixID() + 'advancedSearchButton').click();
+}
+    
+function generateQuery(advSearch) {
+    query.clearTerms();
+    for(var i in advSearch) {
+        if(advSearch[i].id != 'data'
+           && advSearch[i].id != 'dependencyID') {
+            query.addTerm(advSearch[i].id, advSearch[i].operator, advSearch[i].match, advSearch[i].gate);
+        }
+        else {
+            query.addDataTerm(advSearch[i].id, advSearch[i].indicatorID, advSearch[i].operator, advSearch[i].match, advSearch[i].gate);
+        }
+    }
+}
+
+var query;
+var leafSearchTerms = {};
+var dialog_confirm;
+ready(function() {
+    query = new LeafFormQuery();
+    dialog_confirm = new dialogController('confirm_xhrDialog', 'confirm_xhr', 'confirm_loadIndicator', 'confirm_button_save', 'confirm_button_cancelchange');
+
+    preparePreview();
+    
+    document.querySelector('#btn_runFunction').addEventListener('click', function() {
+        prelaunchCheck();
+    });
+    
+    document.querySelector('#functionName').innerHTML = functionDescription;
+});
+    
+</script>
+
+<div style="width: 60vw; margin: auto">
+    <div id="controlContainer" style="border: 1px solid black; background-color: white; padding: 8px">
+        <h1>Programmatic Mass Action</h1>
+        <p>This site assists developers in running custom functions on LEAF records using a standard API.</p>
+        <ol>
+            <li>Establish a filter and preview records</li>
+            <li>The mass action payload will run on the records in the preview after clicking "Run Function"</li>
+        </ol>
+        <button id="btn_runFunction" class="buttonNorm"><img src="dynicons/?img=media-playback-start.svg&amp;w=32"/> Run Function</button>
+        <h2>Function Description: <span id="functionName">(Function not loaded)</span></h2>
+        <h2>Status: <span id="functionStatus">(Function not running)</span></h2>
+    </div>
+    <br />
+    <div id="searchContainer"></div>
+    <h2 id="previewStatus"></h2>
+    <div id="previewGrid"></div>
+</div>
+
+<div id="confirm_xhrDialog" style="background-color: #feffd1; border: 1px solid black; visibility: hidden; display: none">
+<form id="confirm_record" enctype="multipart/form-data" action="javascript:void(0);">
+    <div>
+        <div id="confirm_loadIndicator" style="visibility: hidden; position: absolute; text-align: center; font-size: 24px; font-weight: bold; background: white; padding: 16px; height: 100px; width: 360px">Loading... <img src="images/largespinner.gif" alt="loading..." title="loading..." /></div>
+        <div id="confirm_xhr" style="font-size: 130%; width: 400px; height: 120px; padding: 16px; overflow: auto"></div>
+        <div style="position: absolute; left: 10px; font-size: 140%"><button class="buttonNorm" id="confirm_button_cancelchange" style="font-size: 16pt"> 🛑 Stop</button></div>
+        <div style="text-align: right; padding-right: 6px"><button class="buttonNorm" id="confirm_button_save"><span id="confirm_saveBtnText" style="font-size: 16pt"> 🚀 Let's Go!</span></button></div><br />
+    </div>
+</form>
+</div>

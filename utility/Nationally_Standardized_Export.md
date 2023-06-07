@@ -7,6 +7,7 @@ Data is retrieved from all subordinate sites and combined into a single file. It
 1. The primary site will need a Form created to store the data. This form should have a field with the "fileupload" input format.
 2. An empty record should be created for the Form.
 3. Update the code with the field ID from #1 and record ID from #2.
+4. The person running this script should have access to data from all sites associated with the Primary.
 
 
 ```html

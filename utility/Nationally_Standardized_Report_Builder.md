@@ -72,6 +72,25 @@ var tStepHeader = [];
 var filterData = {}; // used to remove unused data returned by query
 let categoryID = 'strCatID';
 
+function parseRootPathAndSiteName(url) {
+    let res = {};
+    let parts = url.split('/');
+    res.siteName = parts[parts.length - 2];
+    res.rootPath = '';
+    for(let i = 3; i < parts.length-2; i++) {
+        if(i > 3) {
+            res.rootPath += '/';
+        }
+        res.rootPath += parts[i];
+    }
+
+    if(res.siteName == '') {
+        alert('Warning: Sitemap URL may be missing a slash (/): ' + url);
+    }
+
+    return res;
+}
+
 function addHeader(column) {
     let today = new Date();
     switch(column) {
@@ -92,8 +111,9 @@ function addHeader(column) {
                 editable: false,
                 callback: function(data, blob) {
                     let url = grid.getDataByIndex(data.index).site;
-                    let parts = url.split('/');
-                    $('#'+data.cellContainerID).html(parts[5]);
+                    let path = parseRootPathAndSiteName(url);
+
+                    $('#'+data.cellContainerID).html(path.siteName);
                 }
             });
             headers.unshift({
@@ -102,8 +122,8 @@ function addHeader(column) {
                 editable: false,
                 callback: function(data, blob) {
                     let url = grid.getDataByIndex(data.index).site;
-                    let parts = url.split('/');
-                    $('#'+data.cellContainerID).html(`${parts[3]}/${parts[4]}`);
+                    let path = parseRootPathAndSiteName(url);
+                    $('#'+data.cellContainerID).html(path.rootPath);
                 }
             });
             break;

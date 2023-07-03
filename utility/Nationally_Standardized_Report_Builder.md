@@ -3,13 +3,9 @@ This is a LEAF Programmer script that functions as a Report Builder, which repor
 
 Note that this follows the same data access rules as everything else in LEAF: You must have read access to a record to retrieve data.
 
-## Prerequsites
-1. A custom formGrid.js file is also required, and should be uploaded in the File Manager: https://github.com/department-of-veterans-affairs/LEAF/blob/994530020c3316c759f6a8cef9a0aecbafe86b09/LEAF_Request_Portal/js/formGrid.js. 
-
 ### Nationally Standardized Report Builder
 ```html
 <script src="../libs/js/LEAF/intervalQueue.js"></script>
-<script src="files/formGrid.js"></script>
 <style>
     @import 'css/report.css';
 </style>

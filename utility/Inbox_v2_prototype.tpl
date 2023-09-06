@@ -576,8 +576,11 @@
             queue.setWorker(site => {
                 $('#progressbar').progressbar('option', 'value', queue.getLoaded());
                 $('#progressDetail').html(`Retrieving <span id="progressCount"></span>records from ${site.name}...`);
-                return buildWorkflowCategoryCache(site)
-                    .then(() => loadInboxData(site));
+                return loadInboxData(site).then(() => {
+                    if(Object.keys(dataInboxes[site.url]).length > 0) {
+                        return buildWorkflowCategoryCache(site);
+                    }
+                });
             });
             queue.onComplete(() => {
                 renderInbox();

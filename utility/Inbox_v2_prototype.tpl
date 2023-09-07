@@ -186,7 +186,7 @@
         },
     };
 
-    // renderInbox iterates through the specified sites and renders the view
+    // renderInbox iterates through the specified sites and renders the view, organized by form
     async function renderInbox() {
         for (let i in sites) {
             // sort by dependency description
@@ -218,6 +218,53 @@
             sortedDepDesc.forEach(categoryName => {
                 let recordIDs = depDesc[categoryName];
                 buildDepInbox(dataInboxes[sites[i].url], categoryIDs[categoryName], categoryName, recordIDs,
+                    sites[i]);
+            });
+        }
+        $('#progressContainer').slideUp();
+        $('#loading').slideUp();
+        $('.inbox').fadeIn();
+    }
+
+    // renderInboxByStep iterates through the specified sites and renders the view, organized by workflow step
+    async function renderInboxByStep() {
+        for (let i in sites) {
+            // sort by workflow step
+            let depDesc = {};
+            let categoryIDs = {};
+            
+            for (let j in dataInboxes[sites[i].url]) {
+                if (dataInboxes[sites[i].url][j].categoryNames == undefined) {
+                    dataInboxes[sites[i].url][j].categoryNames = ['INACTIVE FORM'];
+                }
+
+                // select probable category based on workflow
+                let categoryName = 'INACTIVE FORM';
+                let tCatIDs = dataInboxes[sites[i].url][j].categoryIDs;
+                for (let k in tCatIDs) {
+                    if (dataWorkflowCategories[tCatIDs[k]] != undefined) {
+                        categoryName = dataInboxes[sites[i].url][j].categoryNames[k];
+                        dataInboxes[sites[i].url][j].categoryName = categoryName;
+                        break;
+                    }
+                }
+
+                categoryIDs[categoryName] = dataInboxes[sites[i].url][j].categoryIDs;
+                let stepHash = `${dataInboxes[sites[i].url][j].stepTitle}:;STEPID${dataInboxes[sites[i].url][j].stepID}`;
+                if (depDesc[stepHash] == undefined) {
+                    depDesc[stepHash] = [];
+                }
+                j.categoryName = categoryName;
+                depDesc[stepHash].push(j);
+            }
+
+            let sortedDepDesc = Object.keys(depDesc).sort();
+
+            sortedDepDesc.forEach(hash => {
+                let recordIDs = depDesc[hash];
+                let stepName = hash.substring(0, hash.indexOf(':;STEPID'));
+                let stepID = hash.substring(hash.indexOf(':;STEPID') + 8);
+                buildDepInboxByStep(dataInboxes[sites[i].url], stepID, stepName, recordIDs,
                     sites[i]);
             });
         }
@@ -268,7 +315,7 @@
     function triggerLoadWarning() {
         document.querySelector('#status').innerText = 'Not all records have been loaded. After you have reviewed the following records, refresh this page to load the remaining records.';
     }
-    
+
     // Build forms and grids for the inbox's requests and import to html tags
     function buildDepInbox(res, categoryIDs, categoryName, recordIDs, site) {
         let hash = Sha1.hash(site.url);
@@ -299,34 +346,6 @@
                 $('#depList' + hash + '_' + depID).css('display', 'none');
             }
         });
-
-        let headers = [{
-            name: 'Action',
-            indicatorID: 'action',
-            editable: false,
-            sortable: false,
-            callback: function(data, blob) {
-                let depDescription = 'Take Action';
-                $('#' + data.cellContainerID).css('text-align', 'center');
-                $('#' + data.cellContainerID).html('<button id="btn_action' + hash + '_' + depID + '_' +
-                    data.recordID +
-                    '" class="buttonNorm" style="text-align: center; font-weight: bold; white-space: normal">' +
-                    depDescription + '</button>');
-                $('#btn_action' + hash + '_' + depID + '_' + data.recordID).on('click', function() {
-                    loadWorkflow(data.recordID, formGrid.getPrefixID(), site.url);
-                    waitForElm('iframe').then((el) => {
-                        if (!sites.some(site => el.getAttribute('src').includes(site.url))) {
-                            el.setAttribute('src', site.url + el.getAttribute('src'));
-                            el.addEventListener('load', () => {
-                                if (!sites.some(site => el.contentWindow?.document?.querySelector('#record').getAttribute('action').includes(site.url))) {
-                                    el.contentWindow?.document?.querySelector('#record').setAttribute('action', site.url + el.contentWindow?.document?.querySelector('#record').getAttribute('action'));
-                                }
-                            });
-                        }
-                    });
-                })
-            }
-        }];
 
         let customColumns = false;
         if (categoryIDs != undefined) {
@@ -367,6 +386,33 @@
             }
         });
 
+        let headers = [{
+            name: 'Action',
+            indicatorID: 'action',
+            editable: false,
+            sortable: false,
+            callback: function(data, blob) {
+                let depDescription = 'Take Action';
+                $('#' + data.cellContainerID).css('text-align', 'center');
+                $('#' + data.cellContainerID).html('<button id="btn_action' + hash + '_' + depID + '_' +
+                                                   data.recordID +
+                                                   '" class="buttonNorm" style="text-align: center; font-weight: bold; white-space: normal">' +
+                                                   depDescription + '</button>');
+                $('#btn_action' + hash + '_' + depID + '_' + data.recordID).on('click', function() {
+                    loadWorkflow(data.recordID, formGrid.getPrefixID(), site.url);
+                    waitForElm('iframe').then((el) => {
+                        if (!sites.some(site => el.getAttribute('src').includes(site.url))) {
+                            el.setAttribute('src', site.url + el.getAttribute('src'));
+                            el.addEventListener('load', () => {
+                                if (!sites.some(site => el.contentWindow?.document?.querySelector('#record').getAttribute('action').includes(site.url))) {
+                                    el.contentWindow?.document?.querySelector('#record').setAttribute('action', site.url + el.contentWindow?.document?.querySelector('#record').getAttribute('action'));
+                                }
+                            });
+                        }
+                    });
+                })
+            }
+        }];
         headers = customCols.concat(headers);
 
         let formGrid = new LeafFormGrid('depList' + hash + '_' + depID);
@@ -401,6 +447,112 @@
         $('#' + formGrid.getPrefixID() + 'header_title').css('width', '60%');
         $('#depContainerIndicator_' + depID).css('display', 'none');
     }
+
+    // Build forms and grids for the inbox's requests based on the list of $recordIDs, organized by step
+    function buildDepInboxByStep(res, stepID, stepName, recordIDs, site) {
+        let hash = Sha1.hash(site.url);
+		let categoryName = '';
+        if(Object.keys(recordIDs).length > 0) {
+            categoryName = ` (${res[recordIDs[0]].categoryName})`;
+        }
+
+        let icon = getIcon(site.icon, site.name);
+        if (document.getElementById('siteContainer' + hash) == null) {
+            $('#indexSites').append('<li style="font-size: 130%; line-height: 150%"><a href="#' + hash + '">' + site
+                .name + '</a></li>');
+            $('#inbox').append(`<a name="${hash}"></a>
+				<div id="siteContainer${hash}" style="box-shadow: 0 2px 3px #a7a9aa; border: 1px solid black; 
+				background-color: ${site.backgroundColor}; margin: 0px auto 1.5rem">
+				<div style="font-weight: bold; font-size: 200%; line-height: 240%; background-color: ${site.backgroundColor}; color: ${site.fontColor}; ">${icon} ${site.name} </div>
+				<div id="siteFormContainer${hash}" class="siteFormContainers"></div>
+    			</div>`);
+        }
+        $(`#siteFormContainer${hash}`).append(`<div id="depContainer${hash}_${stepID}" class="depContainer"><div id="depLabel${hash}_${stepID}" class="depInbox" style="padding: 8px">
+			<span style="float: right; text-decoration: underline; font-weight: bold">View ${recordIDs.length} requests</span>
+			<span style="font-size: 130%; font-weight: bold">${stepName}${categoryName}</span></div>
+			<div id="depList${hash}_${stepID}" style="width: 90%; margin: auto; display: none"></div></div>`);
+        $('#depLabel' + hash + '_' + stepID).on('click', function() {
+            if ($('#depList' + hash + '_' + stepID).css('display') == 'none') {
+                $('#depList' + hash + '_' + stepID).css('display', 'inline');
+            } else {
+                $('#depList' + hash + '_' + stepID).css('display', 'none');
+            }
+        });
+
+        let customCols = [];
+        site.columns = site.columns ?? 'UID,service,title,status';
+        site.columns.split(',').forEach(col => {
+            if (isNaN(col)) {
+                customCols.push(headerDefinitions[col](site));
+            } else {
+                customCols.push({
+                    name: (dataDictionary[site.url]?.[col]?.name ?? dataDictionary[site.url]?.[col]?.description), indicatorID: parseInt(col), editable: false
+                });
+            }
+        });
+
+        let headers = [{
+            name: 'Action',
+            indicatorID: 'action',
+            editable: false,
+            sortable: false,
+            callback: function(data, blob) {
+                let depDescription = 'Take Action';
+                $('#' + data.cellContainerID).css('text-align', 'center');
+                $('#' + data.cellContainerID).html('<button id="btn_action' + hash + '_' + stepID + '_' +
+                                                   data.recordID +
+                                                   '" class="buttonNorm" style="text-align: center; font-weight: bold; white-space: normal">' +
+                                                   depDescription + '</button>');
+                $('#btn_action' + hash + '_' + stepID + '_' + data.recordID).on('click', function() {
+                    loadWorkflow(data.recordID, formGrid.getPrefixID(), site.url);
+                    waitForElm('iframe').then((el) => {
+                        if (!sites.some(site => el.getAttribute('src').includes(site.url))) {
+                            el.setAttribute('src', site.url + el.getAttribute('src'));
+                            el.addEventListener('load', () => {
+                                if (!sites.some(site => el.contentWindow?.document?.querySelector('#record').getAttribute('action').includes(site.url))) {
+                                    el.contentWindow?.document?.querySelector('#record').setAttribute('action', site.url + el.contentWindow?.document?.querySelector('#record').getAttribute('action'));
+                                }
+                            });
+                        }
+                    });
+                })
+            }
+        }];
+        headers = customCols.concat(headers);
+
+        let formGrid = new LeafFormGrid('depList' + hash + '_' + stepID);
+        formGrid.setRootURL(site.url);
+        formGrid.disableVirtualHeader(); // TODO: figure out why headers aren't sized correctly
+        formGrid.setDataBlob(res);
+        formGrid.hideIndex();
+        formGrid.setHeaders(headers);
+        let tGridData = [];
+        let hasServices = false;
+        recordIDs.forEach(recordID => {
+            if (res[recordID].service != null) {
+                hasServices = true;
+            }
+            tGridData.push(res[recordID]);
+        });
+        // remove service column if there's no services
+        if (hasServices == false) {
+            let tHeaders = formGrid.headers();
+            for (let i = 0; i < tHeaders.length; i++) {
+                if (tHeaders[i].indicatorID == 'service') {
+                    tHeaders.splice(i, 1);
+                }
+            }
+            formGrid.setHeaders(tHeaders);
+        }
+        formGrid.setData(tGridData);
+        formGrid.sort('recordID', 'asc');
+        formGrid.renderBody();
+        //formGrid.loadData(tGridData.map(v => v.recordID).join(','));
+        $('#' + formGrid.getPrefixID() + 'table').css('width', '99%');
+        $('#' + formGrid.getPrefixID() + 'header_title').css('width', '60%');
+        $('#depContainerIndicator_' + stepID).css('display', 'none');
+    }
+
     let dataInboxes = {};
     let dataDictionary = {};
     let dataWorkflowCategories = {};
@@ -555,14 +707,32 @@
         });
     });
 
+	function getCurrLocation() {
+        let hashIndex = window.location.href.indexOf('#');
+        let currLocation = '';
+        if(hashIndex > 0) {
+            currLocation = window.location.href.substring(0, hashIndex);
+        }
+        else {
+            currLocation = window.location.href;
+        }
+        return currLocation;
+    }
+
     let dialog_message;
     let nonAdmin = true;
+    let organizeByRole = false;
     // Script Start
     $(function() {
         let urlParams = new URLSearchParams(window.location.search);
-        if(urlParams.get('adminView') == 1) {
+        if(urlParams.get('adminView') != null) {
             nonAdmin = false;
             document.querySelector('#btn_adminView').innerText = 'View as non-admin';
+        }
+        
+        if(urlParams.get('organizeByRole') != null) {
+            organizeByRole = true;
+            document.querySelector('#btn_organize').innerText = 'Organize by Forms';
         }
         
         getMapSites.then((value) => {
@@ -583,13 +753,18 @@
                 });
             });
             queue.onComplete(() => {
-                renderInbox();
+                if(urlParams.get('organizeByRole') != null) {
+                   renderInboxByStep();
+            	}
+                else {             
+                	renderInbox();
+        		}
             });
 
             sites.forEach(site => queue.push(site));
             
             // If $sites is empty, load the local inbox
-            if(Object.keys(sites).length == 0) {
+            if(Object.keys(sites).length == 0 || urlParams.get('local') != null) {
                 let localSite = {
                     	url: './',
                         name: 'Inbox',
@@ -599,7 +774,7 @@
                     	nonAdmin: nonAdmin,
                 };
                 sites.push(localSite);
-                queue.push(localSite);
+                queue.setQueue([localSite]);
                 document.querySelector('#index').style.visibility = 'hidden';
                 document.querySelector('#inbox').style.width = '70%';
             }
@@ -611,21 +786,24 @@
             });
             
             $('#btn_adminView').on('click', function() {
-                let hashIndex = window.location.href.indexOf('#');
-                let currLocation = '';
-                if(hashIndex > 0) {
-                    currLocation = window.location.href.substring(0, hashIndex);
-                }
-                else {
-                    currLocation = window.location.href;
-                }
+				let currLocation = getCurrLocation();
 
                 if(nonAdmin) {
-                    window.location.href = currLocation + '&adminView=1';
+                    window.location.href = currLocation + '&adminView';
                 }
                 else {
-                    console.log(window.location);
-                    window.location.href = currLocation.replace('&adminView=1', '');
+                    window.location.href = currLocation.replace('&adminView', '');
+                }
+            });
+
+            $('#btn_organize').on('click', function() {
+				let currLocation = getCurrLocation();
+
+                if(organizeByRole) {
+                    window.location.href = currLocation.replace('&organizeByRole', '');
+                }
+                else {
+                    window.location.href = currLocation + '&organizeByRole';
                 }
             });
 
@@ -695,6 +873,7 @@
     <h2 id="progressDetail" style="text-align: center"></h2>
 </div>
 <button id="btn_adminView" class="buttonNorm" style="float: right; <!--{if !$empMembership['groupID'][1]}-->display: none<!--{/if}-->">View as Admin</button>
+<button id="btn_organize" class="buttonNorm" style="float: right">Organize by Roles</button>
 <button id="btn_expandAll" class="buttonNorm" style="float: right">Toggle sections</button>
 <br />
 <div id="inboxContainer">

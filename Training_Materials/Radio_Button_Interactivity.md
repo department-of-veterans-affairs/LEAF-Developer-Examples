@@ -68,5 +68,6 @@ Further reading:
 - https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector
 - https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelectorAll
 - https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
+- https://developer.mozilla.org/en-US/docs/Web/API/Event
 - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions
 

@@ -1,0 +1,1616 @@
+# Report Builder - SPA
+This is the Report Builder implemented as a Single Page Application, which can be used in the LEAF Programmer area.
+
+```html
+<div id="step_1" style="width: fit-content; width: -moz-fit-content; background-color: white; border: 1px solid black; margin: 2em auto; padding: 0px">
+    <div style="background-color: #003a6b; color: white; padding: 4px; font-size: 22px; font-weight: bold">
+        Step 1: Develop search filter
+    </div>
+    <div style="padding: 8px">
+        <div id="searchContainer"></div>
+    </div>
+</div>
+
+<div id="step_2" style="display: none; width: 95%; background-color: white; border: 1px solid black; margin: 2em auto; padding: 0px">
+    <div style="background-color: #0059a4; color: white; padding: 4px; font-size: 22px; font-weight: bold">
+        Step 2: Select Data Columns
+    </div>
+    <div style="padding: 8px">
+        <div id="indicatorList" class="section group" style="padding: 8px">Loading...</div>
+        <br style="clear: both" />
+        <button id="generateReport" class="buttonNorm" style="position: fixed; bottom: 14px; margin: auto; left: 0; right: 0; font-size: 140%; height: 52px; padding-top: 8px; padding-bottom: 4px; width: 70%; margin: auto; text-align: center; box-shadow: 0 0 20px black">Generate Report <img src="dynicons/?img=x-office-spreadsheet-template.svg&w=32" alt="generate report" /></button>
+    </div>
+</div>
+
+<div id="saveLinkContainer" style="display: none">
+    <div id="reportTitleDisplay" style="font-size: 200%; padding-left: 8px;"></div>
+    <input id="reportTitle" type="text" aria-label="Text" style="font-size: 200%; width: 50%" placeholder="Untitled Report" />
+    <p id="reportStats" style="position: absolute; padding-left: 8px; z-index: 1"></p>
+</div>
+
+<div id="results" style="display: none">Loading...</div>
+
+<div id="genericDialog" style="visibility: hidden; display: none">
+    <div>
+        <div id="genericDialogbutton_cancelchange" style="display: none"></div>
+        <div id="genericDialogbutton_save" style="display: none"></div>
+        <div id="genericDialogloadIndicator" style="visibility: hidden; z-index: 9000; position: absolute; text-align: center; font-size: 24px; font-weight: bold; background-color: #f2f5f7; padding: 16px; height: 400px; width: 526px"><img src="images/largespinner.gif" alt="loading..." /></div>
+        <div id="genericDialogxhr" style="min-width: 540px; min-height: 420px; padding: 8px; overflow: auto; font-size: 12px"></div>
+    </div>
+</div>
+<div id="xhrDialog" style="visibility: hidden; display: none; background-color: white; border-style: none solid solid; border-width: 0 1px 1px; border-color: #e0e0e0; padding: 4px">
+<form id="record" enctype="multipart/form-data" action="javascript:void(0);">
+    <div>
+        <button id="button_cancelchange" class="buttonNorm" style="position: absolute; left: 10px"><img src="dynicons/?img=process-stop.svg&amp;w=16" alt="cancel" /> Cancel</button>
+        <button id="button_save" class="buttonNorm" style="position: absolute; right: 10px"><img src="dynicons/?img=media-floppy.svg&amp;w=16" alt="save" /> Save Change</button>
+        <div style="border-bottom: 2px solid black; line-height: 30px"><br /></div>
+        <div id="loadIndicator" style="visibility: hidden; z-index: 9000; position: absolute; text-align: center; font-size: 24px; font-weight: bold; background-color: #f2f5f7; padding: 16px; height: 400px; width: 526px"><img src="images/largespinner.gif" alt="loading..." /></div>
+        <div id="xhr" style="min-width: 540px; min-height: 420px; padding: 8px; overflow: auto; font-size: 12px"></div>
+    </div>
+</form>
+</div>
+<div id="confirm_xhrDialog" style="background-color: #feffd1; border: 1px solid black; visibility: hidden; display: none">
+<form id="confirm_record" enctype="multipart/form-data" action="javascript:void(0);">
+    <div>
+        <div id="confirm_loadIndicator" style="visibility: hidden; position: absolute; text-align: center; font-size: 24px; font-weight: bold; background: white; padding: 16px; height: 100px; width: 360px">Loading... <img src="images/largespinner.gif" alt="loading..." title="loading..." /></div>
+        <div id="confirm_xhr" style="font-size: 130%; width: 400px; height: 120px; padding: 16px; overflow: auto"></div>
+        <div style="position: absolute; left: 10px; font-size: 140%"><button class="buttonNorm" id="confirm_button_cancelchange"><img src="dynicons/?img=edit-undo.svg&amp;w=32" alt="No" title="No" /> No</button></div>
+        <div style="text-align: right; padding-right: 6px"><button class="buttonNorm" id="confirm_button_save"><img src="dynicons/?img=dialog-apply.svg&amp;w=32" alt="Yes" title="Yes" /><span id="confirm_saveBtnText"> Yes</span></button></div><br />
+    </div>
+</form>
+</div>
+<div id="ok_xhrDialog" style="background-color: #feffd1; border: 1px solid black; visibility: hidden; display: none">
+<div>
+    <div id="ok_xhr" style="font-size: 130%; width: 400px; height: 120px; padding: 16px; overflow: auto"></div>
+    <div style="text-align: right; padding-right: 6px"><button class="buttonNorm" id="confirm_button_ok"><img src="dynicons/?img=dialog-apply.svg&amp;w=32" alt="Ok" title="Ok" /><span id="confirm_saveBtnText"> Ok</span></button></div><br />
+</div>
+</div>
+<style>
+.indicatorOption {
+    padding: 4px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+.subIndicatorOption {
+    margin-left: 32px;
+    padding: 4px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+.group:after, 
+.section {
+    clear:both
+} 
+.section {
+    padding:0;
+    margin:0
+}
+.col {
+    display:block;
+    float:left;
+    margin:1% 0 1% 1.6%
+}
+.col:first-child {
+    margin-left:0
+}
+.group:after,.group:before {
+    content:"";
+    display:table
+}
+.group {
+    zoom:1 
+}
+.span_3_of_3 {
+    width:100%
+}
+.span_2_of_3 {
+    width:66.13%
+}
+.span_1_of_3 {
+    width:32.26%
+}
+@media only screen and (max-width:480px) {
+    .col {
+        margin:1% 0
+    }
+    .span_1_of_3,.span_2_of_3,.span_3_of_3 {
+        width:100%
+    }
+}
+</style>
+<script>
+const CSRFToken = '<!--{$CSRFToken}-->';
+const MS_COMPAT_URL = 'EXAMPLE.COM'; // compatibility URL for MS auth
+
+//Object.assign for IE
+if (typeof Object.assign !== 'function') {
+    Object.assign = function(target) {
+        'use strict';
+        if (target == null) {
+            throw new TypeError('Cannot convert undefined or null to object');
+        }
+        target = Object(target);
+        for (let index = 1; index < arguments.length; index++) {
+            let source = arguments[index];
+            if (source != null) {
+                for (let key in source) {
+                    if (Object.prototype.hasOwnProperty.call(source, key)) {
+                        target[key] = source[key];
+                    }
+                }
+            }
+        }
+        return target;
+    };
+}
+
+function loadWorkflow(recordID, prefixID) {
+    dialog_message.setTitle('Apply Action to #' + recordID);
+    currRecordID = recordID;
+    dialog_message.setContent('<div id="workflowcontent"></div><div id="currItem"></div>');
+    workflow = new LeafWorkflow('workflowcontent', '<!--{$CSRFToken}-->');
+    workflow.setActionSuccessCallback(function() {
+        dialog_message.hide();
+        $('#' + prefixID + 'tbody_tr' + recordID).fadeOut(1300);
+    });
+    workflow.getWorkflow(recordID);
+    dialog_message.show();
+}
+
+function prepareEmail(link) {
+    mailtoHref = 'mailto:?subject=Report%20for&body=Report%20Link:%20'+ encodeURIComponent(link) +'%0A%0A';
+    $('body').append($('<iframe id="ie9workaround" style="display:none;" src="' + mailtoHref + '"/>'));
+}
+
+var delim = '<span class="nodisplay">^;</span>'; // invisible delimiters to help Excel users
+var delimLF = "\r\n";
+var tDepHeader = [];
+var tStepHeader = [];
+var filterData = {}; // used to remove unused data returned by query
+let categoryID = 'strCatID';
+
+function addHeader(column) {
+    let today = new Date();
+    switch(column) {
+        case 'title':
+            filterData['title'] = 1;
+            headers.push({
+                name: 'Title',
+                indicatorID: 'title',
+                callback: function(data, blob) {
+                    $('#'+data.cellContainerID).html(blob[data.recordID].title);
+                    $('#'+data.cellContainerID).on('click', function(){
+                        changeTitle(data, $('#'+data.cellContainerID).html());
+                });
+            }});
+            break;
+        case 'service':
+            filterData['service'] = 1;
+            headers.push({
+                name: 'Service',
+                indicatorID: 'service',
+                editable: false,
+                callback: function(data, blob) {
+                $('#'+data.cellContainerID).html(blob[data.recordID].service);
+            }});
+            break;
+        case 'type':
+            filterData['categoryNames'] = 1;
+            leafSearch.getLeafFormQuery().join('categoryName');
+            headers.push({
+                name: 'Type',
+                indicatorID: 'type',
+                editable: false,
+                callback: function(data, blob) {
+                     let types = '';
+                     for(let i in blob[data.recordID].categoryNames) {
+                         types += blob[data.recordID].categoryNames[i] + ' | ';
+                     }
+                     types = types.substr(0, types.length - 3);
+                     $('#'+data.cellContainerID).html(types);
+            }});
+            break;
+        case 'status':
+            filterData['stepTitle'] = 1;
+            filterData['lastStatus'] = 1;
+            leafSearch.getLeafFormQuery().join('status');
+            headers.push({
+                name: 'Current Status',
+                indicatorID: 'status',
+                editable: false,
+                callback: function(data, blob) {
+                     var status = blob[data.recordID].stepTitle == null ? blob[data.recordID].lastStatus : 'Pending ' + blob[data.recordID].stepTitle;
+                     status = status == null ? 'Not Submitted' : status;
+                     if(blob[data.recordID].deleted > 0) {
+                         status += ', Cancelled';
+                     }
+                     $('#'+data.cellContainerID).html(status);
+            }});
+            break;
+        case 'initiator':
+            filterData['lastName'] = 1;
+            filterData['firstName'] = 1;
+            leafSearch.getLeafFormQuery().join('initiatorName');
+            headers.push({
+                name: 'Initiator', indicatorID: 'initiator', editable: false, callback: function(data, blob) {
+                $('#'+data.cellContainerID).html(blob[data.recordID].lastName + ', ' + blob[data.recordID].firstName);
+            }});
+            break;
+        case 'dateCancelled':
+            filterData['deleted'] = 1;
+            filterData['action_history.approverName'] = 1;
+            leafSearch.getLeafFormQuery().join('action_history');
+            headers.push({
+                name: 'Date Cancelled', indicatorID: 'dateCancelled', editable: false, callback: function(data, blob) {
+                if(blob[data.recordID].deleted > 0) {
+                    var date = new Date(blob[data.recordID].deleted * 1000);
+                    $('#'+data.cellContainerID).html(date.toLocaleDateString().replace(/[^ -~]/g,'')); // IE11 encoding workaround: need regex replacement
+                }
+            }});
+            headers.push({
+                name: 'Cancelled By', indicatorID: 'cancelledBy', editable: false, callback: function(data, blob) {
+                if(blob[data.recordID].action_history != undefined) {
+                    var cancelData = blob[data.recordID].action_history.pop();
+                    if(cancelData != undefined && cancelData.actionType === 'deleted') {
+                        $('#'+data.cellContainerID).html(cancelData.approverName);
+                    }
+                }
+            }});
+            break;
+        case 'dateInitiated':
+            filterData['date'] = 1;
+            headers.push({
+                name: 'Date Initiated', indicatorID: 'dateInitiated', editable: false, callback: function(data, blob) {
+                var date = new Date(blob[data.recordID].date * 1000);
+                $('#'+data.cellContainerID).html(date.toLocaleDateString().replace(/[^ -~]/g,'')); // IE11 encoding workaround: need regex replacement
+            }});
+            break;
+        case 'dateResolved':
+            filterData['recordResolutionData'] = 1;
+            leafSearch.getLeafFormQuery().join('recordResolutionData');
+            headers.push({
+                name: 'Date Resolved', indicatorID: 'dateResolved', editable: false, callback: function(data, blob) {
+                if(blob[data.recordID].recordResolutionData != undefined) {
+                    var date = new Date(blob[data.recordID].recordResolutionData.fulfillmentTime * 1000);
+                    $('#'+data.cellContainerID).html(date.toLocaleDateString().replace(/[^ -~]/g,'')); // IE11 encoding workaround: need regex replacement
+                }
+            }});
+            headers.push({
+                name: 'Action Taken', indicatorID: 'typeResolved', editable: false, callback: function(data, blob) {
+                if(blob[data.recordID].recordResolutionData != undefined) {
+                    $('#'+data.cellContainerID).html(blob[data.recordID].recordResolutionData.lastStatus);
+                }
+            }});
+            break;
+        case 'resolvedBy':
+            filterData['recordResolutionBy'] = 1;
+            leafSearch.getLeafFormQuery().join('recordResolutionBy');
+            headers.push({
+                name: 'Resolved By', indicatorID: 'resolvedBy', editable: false, callback: function(data, blob) {
+                if(blob[data.recordID].recordResolutionBy != undefined) {
+                    $('#'+data.cellContainerID).html(blob[data.recordID].recordResolutionBy.resolvedBy);
+                }
+            }});
+            break;
+        case 'actionButton':
+            headers.unshift({
+                name: 'Action', indicatorID: 'actionButton', editable: false, callback: function(data, blob) {
+                $('#'+data.cellContainerID).html('<div tabindex="0" class="buttonNorm">Take Action</div>');
+                $('#'+data.cellContainerID).on('keydown', function(e) {
+                    if (e.which === 13) {
+                        e.preventDefault();
+                        loadWorkflow(data.recordID, grid.getPrefixID());
+                    }
+                });
+                $('#'+data.cellContainerID).on('click', function() {
+                    loadWorkflow(data.recordID, grid.getPrefixID());
+                });
+            }});
+            break;
+        case 'action_history':
+            filterData['action_history.time'] = 1;
+            filterData['action_history.comment'] = 1;
+            leafSearch.getLeafFormQuery().join('action_history');
+            headers.push({
+                name: 'Comment History',
+                indicatorID: 'action_history',
+                editable: false,
+                callback: function(data, blob) {
+                     var buffer = '<table style="min-width: 300px">';
+                     var now = new Date();
+
+                     for(let i in blob[data.recordID].action_history) {
+                         var date = new Date(blob[data.recordID].action_history[i]['time'] * 1000);
+                         var formattedDate = date.toLocaleDateString();
+                         if(blob[data.recordID].action_history[i]['comment'] != '') {
+                             buffer += '<tr><td style="border-right: 1px solid black; padding-right: 4px; text-align: right">'
+                                + formattedDate + delim + '</td><td style="padding-left: 4px">' + blob[data.recordID].action_history[i]['comment'] + '.</td>'
+                                + delimLF + '</tr>';
+                         }
+                     }
+                     buffer += '</table>';
+                     $('#'+data.cellContainerID).html(buffer);
+            }});
+            break;
+        case 'approval_history':
+            filterData['action_history.time'] = 1;
+            filterData['action_history.description'] = 1;
+            filterData['action_history.actionTextPasttense'] = 1;
+            filterData['action_history.approverName'] = 1;
+            leafSearch.getLeafFormQuery().join('action_history');
+            headers.push({
+                name: 'Approval History',
+                indicatorID: 'approval_history',
+                editable: false,
+                callback: function(data, blob) {
+                     var buffer = '<table class="table" style="min-width: 300px">';
+                     var now = new Date();
+
+                     for(let i in blob[data.recordID].action_history) {
+                         var date = new Date(blob[data.recordID].action_history[i]['time'] * 1000);
+                         var formattedDate = date.toLocaleDateString();
+                         var actionDescription = blob[data.recordID].action_history[i]['description'] != null ? blob[data.recordID].action_history[i]['description'] : '';
+                         buffer += '<tr><td>'
+                               + formattedDate + delim + '</td>'
+                               + '<td>' + actionDescription + delim  + '</td>'
+                               + '<td>' + blob[data.recordID].action_history[i]['actionTextPasttense'] + delim + '</td>'
+                               + '<td>' + blob[data.recordID].action_history[i]['approverName'] + '</td>'
+                               + delimLF + '</tr>';
+                     }
+                     buffer += '</table>';
+                     $('#'+data.cellContainerID).html(buffer);
+                 }});
+            break;
+        case 'days_since_last_action':
+        case 'days_since_last_step_movement':
+            filterData['action_history.time'] = 1;
+            filterData['action_history.stepID'] = 1;
+            filterData['action_history.actionType'] = 1;
+            filterData['stepFulfillmentOnly'] = 1;
+            filterData['submitted'] = 1;
+            leafSearch.getLeafFormQuery().join('action_history');
+            leafSearch.getLeafFormQuery().join('stepFulfillmentOnly');
+
+            let headerName = (column === 'days_since_last_action') ? 'Days Since Last Action' : 'Days Since Last Workflow Change';
+            let indicatorIDName = (column === 'days_since_last_action') ? 'daysSinceLastAction' : 'daysSinceLastStepMovement';
+            headers.push({
+                name: headerName,
+                indicatorID: indicatorIDName,
+                editable: false,
+                callback: function(data, blob) {
+                    let daysSinceAction;
+                    let recordBlob = blob[data.recordID];
+                    if(recordBlob.action_history != undefined && recordBlob.action_history.length > 0) {
+                        // Get Last Action no matter what (could change for non-comment)
+                        let lastActionRecord = recordBlob.action_history.length - 1;
+                        let lastAction = recordBlob.action_history[lastActionRecord];
+                        let date = new Date(lastAction?.time * 1000);
+
+                        // We want to get date of last non-comment action so let's roll
+                        if (column === 'days_since_last_step_movement') {
+                            // Already have date we need if
+                            //  1) Only submit
+                            //  2) Last action was a manual step move
+                            //  3) No records in Step Fulfillment - Completed
+                            if ( (lastActionRecord > 0)
+                                && (lastAction.stepID != 0 && lastAction.actionType !== 'move')
+                                && (recordBlob.stepFulfillmentOnly != undefined)
+                            ) {
+                                // Newest addition to Step Fulfillment table is date we need
+                                let lastStep = recordBlob.stepFulfillmentOnly[0];
+                                date = new Date(lastStep.time * 1000);
+                            }
+                        }
+                        daysSinceAction = Math.round((today.getTime() - date.getTime()) / 86400000);
+                        if(recordBlob.submitted == 0) {
+                            // if there's no submit timestamp, then it's not submitted
+                            daysSinceAction = "Not Submitted";
+                        }
+                    }
+                    else {
+                        daysSinceAction = "Not Submitted";
+                    }
+                    $('#'+data.cellContainerID).html(daysSinceAction);
+                }
+            });
+            break;
+        case 'destructionDate':
+            filterData['submitted'] = 1;
+            filterData['destructionAge'] = 1;
+            filterData['deleted'] = 1;
+            filterData['recordResolutionData'] = 1;
+            leafSearch.getLeafFormQuery().join('destructionDate');
+            headers.push({
+                name: 'Date of Scheduled Destruction', indicatorID: 'destructionDate', editable: false, callback: function(data, blob) {
+                //NOTE: requests still show if the form is disabled but there is no info from categories table
+                const destructionAgeDays = blob[data.recordID]?.destructionAge || null;
+                let content = '';
+                if (destructionAgeDays === null) {
+                    content = 'never';
+                } else {
+                    const destMilliseconds = destructionAgeDays * 24 * 60 * 60 * 1000;
+                    const recordResolutionData = blob[data.recordID]?.recordResolutionData || null;
+                    const deletionDate = blob[data.recordID].deleted * 1000;
+                    //if there is no resolution data the report is either not yet fulfilled OR cancelled
+                    if (recordResolutionData === null) {
+                        if(deletionDate === 0) {
+                            content = `${destructionAgeDays} days after resolution`;
+                        } else {
+                            content = new Date(deletionDate + destMilliseconds).toLocaleDateString();
+                        }
+                    //fulfilled requests
+                    } else {
+                        const fulfillmentTime = recordResolutionData.fulfillmentTime * 1000;
+                        content = new Date(fulfillmentTime + destMilliseconds).toLocaleDateString();
+                    }
+                }
+                $('#'+data.cellContainerID).html(content);
+            }});
+            break;
+        default:
+            if(column.substr(0, 6) === 'depID_') { // backwards compatibility for LEAF workflow requirement based approval dates
+                filterData['recordsDependencies'] = 1;
+                depID = column.substr(6);
+                tDepHeader[depID] = 0;
+                leafSearch.getLeafFormQuery().join('recordsDependencies');
+                headers.push({
+                    name: 'Checkpoint Date',
+                    indicatorID: column,
+                    editable: false,
+                    callback: function(depID) {
+                    return function(data, blob) {
+                        if(blob[data.recordID].recordsDependencies != undefined
+                            && blob[data.recordID].recordsDependencies[depID] != undefined) {
+                            var date = new Date(blob[data.recordID].recordsDependencies[depID].time * 1000);
+                            $('#'+data.cellContainerID).html(date.toLocaleDateString().replace(/[^ -~]/g,'')); // IE11 encoding workaround: need regex replacement
+                            if(tDepHeader[depID] == 0) {
+                                headerID = data.cellContainerID.substr(0, data.cellContainerID.indexOf('_') + 1) + 'header_' + column;
+                                $('#' + headerID).html(blob[data.recordID].recordsDependencies[depID].description);
+                                $('#Vheader_' + column).html(blob[data.recordID].recordsDependencies[depID].description);
+                                tDepHeader[depID] = 1;
+                            }
+                        }
+                    }
+                }(depID)});
+            }
+            if(column.substr(0, 7) === 'stepID_') { // approval dates based on workflow steps
+                filterData['stepFulfillment'] = 1;
+                stepID = column.substr(7);
+                tStepHeader[stepID] = 0;
+                leafSearch.getLeafFormQuery().join('stepFulfillment');
+                headers.push({
+                    name: 'Checkpoint Date',
+                    indicatorID: column,
+                    editable: false,
+                    callback: function(stepID) {
+                    return function(data, blob) {
+                        if(blob[data.recordID].stepFulfillment != undefined
+                            && blob[data.recordID].stepFulfillment[stepID] != undefined) {
+                            var date = new Date(blob[data.recordID].stepFulfillment[stepID].time * 1000);
+                            $('#'+data.cellContainerID).html(date.toLocaleDateString().replace(/[^ -~]/g,'')); // IE11 encoding workaround: need regex replacement
+
+                            if(tStepHeader[stepID] == 0) {
+                                headerID = data.cellContainerID.substr(0, data.cellContainerID.indexOf('_') + 1) + 'header_' + column;
+                                $('#' + headerID).html(blob[data.recordID].stepFulfillment[stepID].step);
+                                $('#Vheader_' + column).html(blob[data.recordID].stepFulfillment[stepID].step);
+                                tStepHeader[stepID] = 1;
+                            }
+                        }
+                    }
+                }(stepID)});
+            }
+            break;
+    }
+}
+
+var resIndicatorList = { };
+var searchPrereqsLoaded = false;
+function loadSearchPrereqs() {
+    if(searchPrereqsLoaded == true) {
+        return;
+    }
+    searchPrereqsLoaded = true;
+    $.ajax({
+        type: 'GET',
+        url: './api/form/indicator/list?x-filterData=name,indicatorID,categoryID,categoryName,parentCategoryID,parentStaples,isDisabled',
+        dataType: 'text json',
+        success: function(res) {
+            var buffer = '';
+
+
+            // special columns
+            buffer += '<div class="col span_1_of_3">';
+            buffer += '<div class="indicatorOption"><label class="checkable leaf_check" for="indicators_title">';
+            buffer += '<input type="checkbox" class="icheck leaf_check" id="indicators_title" name="indicators[title]" value="title" /><span class="leaf_check"></span> Title of Request</label></div>';
+            buffer += '<div class="indicatorOption"><label class="checkable leaf_check" for="indicators_service">';
+            buffer += '<input type="checkbox" class="icheck leaf_check" id="indicators_service" name="indicators[service]" value="service" /><span class="leaf_check"></span> Service</label></div>';
+            buffer += '<div class="indicatorOption"><label class="checkable leaf_check" for="indicators_type">';
+            buffer += '<input type="checkbox" class="icheck leaf_check" id="indicators_type" name="indicators[type]" value="type" /><span class="leaf_check"></span> Type of Request</label></div>';
+            buffer += '<div class="indicatorOption"><label class="checkable leaf_check" for="indicators_status">';
+            buffer += '<input type="checkbox" class="icheck leaf_check" id="indicators_status" name="indicators[status]" value="status" /><span class="leaf_check"></span> Current Status</label></div>';
+            buffer += '<div class="indicatorOption"><label class="checkable leaf_check" for="indicators_initiator">';
+            buffer += '<input type="checkbox" class="icheck leaf_check" id="indicators_initiator" name="indicators[initiator]" value="initiator" /><span class="leaf_check"></span> Initiator</label></div>';
+            buffer += '<div class="indicatorOption"><label class="checkable leaf_check" for="indicators_actionButton">';
+            buffer += '<input type="checkbox" class="icheck leaf_check" id="indicators_actionButton" name="indicators[actionButton]" value="actionButton" /><span class="leaf_check"></span> Action Button</label></div>';
+            buffer += '<div class="indicatorOption"><label class="checkable leaf_check" for="indicators_action_history">';
+            buffer += '<input type="checkbox" class="icheck leaf_check" id="indicators_action_history" name="indicators[action_history]" value="action_history" /><span class="leaf_check"></span> Comment History</label></div>';
+            buffer += '<div class="indicatorOption"><label class="checkable leaf_check" for="indicators_approval_history">';
+            buffer += '<input type="checkbox" class="icheck leaf_check" id="indicators_approval_history" name="indicators[approval_history]" value="approval_history" /><span class="leaf_check"></span> Approval History</label></div>';
+            buffer += '<div class="indicatorOption"><label class="checkable leaf_check" for="indicators_days_since_last_action">';
+            buffer += '<input type="checkbox" class="icheck leaf_check" id="indicators_days_since_last_action" name="indicators[days_since_last_action]" value="days_since_last_action" /><span class="leaf_check"></span> Days Since Last Action</label></div>';
+            buffer += '<div class="indicatorOption"><label class="checkable leaf_check" for="indicators_days_since_last_step_movement">';
+            buffer += '<input type="checkbox" class="icheck leaf_check" id="indicators_days_since_last_step_movement" name="indicators[days_since_last_step_movement]" value="days_since_last_step_movement" /><span class="leaf_check"></span> Days Since Last Step Movement</label></div>';
+            buffer += '</div>';
+
+            var groupList = {};
+            var groupNames = [];
+            var groupIDmap = {};
+            var tmp = document.createElement('div');
+            var temp;
+            let grid = {};
+
+            for(let i in res) {
+                temp = res[i].name;
+                tmp.innerHTML = temp;
+                temp = tmp.textContent || tmp.innerText || '';
+                temp = temp.replace(/[^\040-\176]/g, '');
+
+                resIndicatorList[res[i].indicatorID] = temp;
+
+                if(groupList[res[i].categoryID] == undefined) {
+                    groupList[res[i].categoryID] = [];
+                }
+                groupList[res[i].categoryID].push(res[i].indicatorID);
+                if(groupIDmap[res[i].categoryID] == undefined) {
+                    groupNames.push({
+                        categoryID: res[i].categoryID,
+                        categoryName: res[i].categoryName
+                    });
+                    groupIDmap[res[i].categoryID] = { };
+                    groupIDmap[res[i].categoryID].categoryName = res[i].categoryName;
+                    groupIDmap[res[i].categoryID].categoryID = res[i].categoryID;
+                    groupIDmap[res[i].categoryID].parentCategoryID = res[i].parentCategoryID;
+                    groupIDmap[res[i].categoryID].parentStaples = res[i].parentStaples;
+                }
+            }
+            buffer += '<div class="col span_1_of_3">';
+
+            groupNames.sort(function(a, b) {
+                a = a.categoryName.toLowerCase();
+                b = b.categoryName.toLowerCase();
+                if(a < b) {
+                    return -1;
+                }
+                if(a > b) {
+                    return 1;
+                }
+                return 0;
+            });
+
+            for(let k in groupNames) {
+                var i = groupNames[k].categoryID;
+                var associatedCategories = groupIDmap[i].categoryID;
+                if(groupIDmap[i].parentCategoryID != '') {
+                    associatedCategories += ' ' + groupIDmap[i].parentCategoryID;
+                }
+                if(groupIDmap[i].parentStaples != null) {
+                    for(var j in groupIDmap[i].parentStaples) {
+                        associatedCategories += ' ' + groupIDmap[i].parentStaples[j];
+                    }
+                }
+
+                var categoryLabel = groupNames[k].categoryName;
+                if(groupIDmap[i].parentCategoryID != '' && groupIDmap[groupIDmap[i].parentCategoryID]) {
+                    categoryLabel += "<br />" + groupIDmap[groupIDmap[i].parentCategoryID].categoryName;
+                }
+                buffer += '<div tabindex="0" class="form category '+ associatedCategories +'" style="width: 250px; float: left; min-height: 30px; margin-bottom: 4px"><div class="formLabel buttonNorm"><img src="dynicons/?img=gnome-zoom-in.svg&w=32" alt="Icon to expand section"/> ' + categoryLabel + '</div>';
+                for(let j in groupList[i]) {
+                    const indID = groupList[i][j];
+                    const isDisabled = res.find(ele => ele.indicatorID === indID).isDisabled;
+                    const isArchivedClass = isDisabled > 0 ? ' is-archived' : '';
+                    const isArchivedText = isDisabled > 0 ? ' (Archived)' : '';
+                    buffer += `<div class="indicatorOption${isArchivedClass}" id="indicatorOption_${indID}" style="display: none"><label class="checkable leaf_check" for="indicators_${indID}" title="indicatorID: ${indID}\n${resIndicatorList[indID]}${isArchivedText}" alt="indicatorID: ${indID}${isArchivedText}">`;
+                    buffer += `<input type="checkbox" class="icheck leaf_check parent" id="indicators_${indID}" name="indicators[${indID}]" value="${indID}" />`
+                    buffer += `<span class="leaf_check"></span> ${resIndicatorList[indID]}${isArchivedText}</label>`;
+                    // sub checklist for case of grid indicator
+                    const format = res.find(i => i.indicatorID === indID)?.format;
+                    if (format && format.indexOf('grid')===0) {
+                        const cols = JSON.parse(format.slice(format.indexOf('\n')));
+                        for (let c in cols) {
+                            const col = cols[c];
+                            buffer += `<div class="subIndicatorOption" style="display: none"><label class="checkable leaf_check" for="indicators_${indID}_columns_${col.id}" title="columnID: ${col.id}\n${col.name}">`;
+                            buffer += `<input type="checkbox" class="icheck leaf_check parent-indicators_${indID}" id="indicators_${indID}_columns_${col.id}" name="indicators[${indID}].columns[${col.name}]" value="${col.id}" gridParent="${indID}" />`;
+                            buffer += `<span class="leaf_check"></span> ${col.name}</label></div>`;
+                        }
+                    }
+                    buffer += '</div>';
+                }
+                buffer += '</div>';
+            }
+            buffer += '</div>';
+
+            $('#indicatorList').html(buffer);
+
+            $('#indicatorList').css('height', $(window).height() - 240);
+
+            //toggle all subcheckboxes with parent indicator checkbox
+            $('.indicatorOption > label > input').on('change', function() {
+                const indicatorIsChecked = this.checked;
+                $(`input[id^="indicators_${this.value}_columns"`).prop('checked', indicatorIsChecked);
+            });
+            //check parent if any subcheckbox is checked, uncheck if none are checked
+            $('.subIndicatorOption > label > input').on('change', function() {
+                const indicatorID = this.getAttribute('gridparent');
+                const siblings = Array.from($(`input[id^="indicators_${indicatorID}_columns"`));
+                const atLeastOneChecked = siblings.some(sib => sib.checked === true);
+                if(atLeastOneChecked) {
+                    $(`#indicators_${indicatorID}`).prop('checked', true);
+                } else $(`#indicators_${indicatorID}`).prop('checked', false);
+            });
+
+            $('.form').on('keydown', function(event) {
+                if (event.keyCode === 13) {
+                    $(this).children('.formLabel').removeClass('buttonNorm');
+                    $(this).find('.formLabel>img').css('display', 'none');
+                    $(this).css({width: '100%'});
+                    $(this).children('div').css('display', 'block');
+                    $(this).children('div').children('.subIndicatorOption').css('display', 'block');
+                    $(this).children('.formLabel').css({'border-bottom': '1px solid #e0e0e0',
+                        'font-weight': 'bold'});
+                }
+            });
+
+            $('.form').on('click', function() {
+                $(this).children('.formLabel').removeClass('buttonNorm');
+                $(this).find('.formLabel>img').css('display', 'none');
+                $(this).css({width: '100%'});
+                $(this).children('div').css('display', 'block');
+                $(this).children('div').children('.subIndicatorOption').css('display', 'block');
+                $(this).children('.formLabel').css({'border-bottom': '1px solid #e0e0e0',
+                    'font-weight': 'bold'});
+            });
+
+            $.ajax({
+                type: 'GET',
+                url: './api/workflow/steps',
+                dataType: 'json',
+                success: function(res) {
+                    let allStepsData = res;
+                    buffer = '';
+                    buffer += '<div class="form col span_1_of_3" style="min-height: 30px; margin: 4px"><div class="formLabel" style="border-bottom: 1px solid #e0e0e0; font-weight: bold">Checkpoint Dates<br />(Data only available from May 3, 2017)</div>';
+                    for(let i in allStepsData) {
+                        buffer += '<div class="indicatorOption"><label class="checkable leaf_check" for="indicators_stepID_'+ allStepsData[i].stepID +'" title="'+ allStepsData[i].stepTitle +'">';
+                        buffer += '<input type="checkbox" class="icheck leaf_check" id="indicators_stepID_'+ allStepsData[i].stepID +'" name="indicators[stepID'+ allStepsData[i].stepID +']" value="stepID_'+ allStepsData[i].stepID +'" />'
+                        buffer += '<span class="leaf_check"></span> '+ allStepsData[i].description + ' - ' + allStepsData[i].stepTitle +'</label></div>';
+                    }
+                    buffer += '<div id="legacyDependencies"></div>'; // backwards compat
+                    buffer += '</div>';
+
+                    $('#indicatorList').append(buffer);
+
+                    $.ajax({
+                        type: 'GET',
+                        url: './api/workflow/dependencies',
+                        dataType: 'json',
+                        success: function(res) {
+                            buffer2 = '';
+                            buffer2 += '<div><br /><br /><div class="formLabel" style="border-bottom: 1px solid #e0e0e0; font-weight: bold">Action Dates (step requirements)</div>';
+
+                            // Option to retrieve Date Request Initiated / Resolved
+                            buffer2 += '<div id="option_dateCancelled" class="indicatorOption"><label class="checkable leaf_check" for="indicators_dateCancelled" title="Date request Cancelled">';
+                            buffer2 += '<input type="checkbox" class="icheck leaf_check" id="indicators_dateCancelled" name="indicators[dateCancelled]" value="dateCancelled" /><span class="leaf_check"></span> Date Request Cancelled</label></div>';
+                            buffer2 += '<div class="indicatorOption"><label class="checkable leaf_check" for="indicators_dateInitiated" title="Date request initiated">';
+                            buffer2 += '<input type="checkbox" class="icheck leaf_check" id="indicators_dateInitiated" name="indicators[dateInitiated]" value="dateInitiated" /><span class="leaf_check"></span> Date Request Initiated</label></div>';
+                            buffer2 += '<div class="indicatorOption"><label class="checkable leaf_check" for="indicators_dateResolved" title="Date request resolved">';
+                            buffer2 += '<input type="checkbox" class="icheck leaf_check" id="indicators_dateResolved" name="indicators[dateResolved]" value="dateResolved" /><span class="leaf_check"></span> Date Request Resolved</label></div>';
+                            buffer2 += '<div class="indicatorOption"><label class="checkable leaf_check" for="indicators_resolvedBy" title="Resolved By">';
+                            buffer2 += '<input type="checkbox" class="icheck leaf_check" id="indicators_resolvedBy" name="indicators[resolvedBy]" value="resolvedBy" /><span class="leaf_check"></span> Resolved By</label></div>';
+                            buffer2 += '<div class="indicatorOption"><label class="checkable leaf_check" for="indicators_destruction">';
+                            buffer2 += '<input type="checkbox" class="icheck leaf_check" id="indicators_destruction" name="indicators[destructionDate]" value="destructionDate" /><span class="leaf_check"></span> Date of Scheduled Destruction</label></div>';
+
+                            for(let i in res) {
+                                buffer2 += '<div class="indicatorOption"><label class="checkable leaf_check" for="indicators_depID_'+ res[i].dependencyID +'">';
+                                buffer2 += '<input type="checkbox" class="icheck leaf_check" id="indicators_depID_'+ res[i].dependencyID +'" name="indicators[depID_'+ res[i].dependencyID +']" value="depID_'+ res[i].dependencyID +'" /><span class="leaf_check"></span> ' + res[i].description +'</label></div>';
+                            }
+                            buffer2 += '</div>';
+
+                            $('#legacyDependencies').append(buffer2);
+
+                            // write buffer and finalize view
+                            //$('#indicatorList').append(buffer);
+
+                            // set user selections
+                            if(t_inIndicators != undefined) {
+                                for(let i in t_inIndicators) {
+                                    $('#indicators_' + t_inIndicators[i].indicatorID).prop('checked', true);
+
+                                    if (t_inIndicators[i].cols !== undefined) {
+                                        for (var j in t_inIndicators[i].cols) {
+                                            $('#indicators_' + t_inIndicators[i].indicatorID + '_columns_' + t_inIndicators[i].cols[j]).prop('checked', true);
+                                        }
+                                    }
+                                }
+                            }
+                            else {
+                                // pre-select defaults
+                                $('#indicators_title').prop('checked', true);
+                            }
+
+                        }
+                    });
+                }
+            });
+        }
+    });
+}
+
+//loop through headers array, and if its ID exists as a key on
+//the gridColor data object, updates background and text color
+//called at Edit Label's 'save' and report page load
+function updateHeaderColors(){
+    headers.forEach(function(header) {
+        if (gridColorData.hasOwnProperty(header.indicatorID)) {
+            let bg_color = gridColorData[header.indicatorID];
+            //IE uses text inputs. Allows only #<6digithex>
+            if (!/^#[0-9a-f]{6}$/i.test(bg_color)){
+                gridColorData[header.indicatorID] = '#D1DFFF';
+                bg_color = '#D1DFFF';
+            }
+            let elHeader = document.getElementById(grid.getPrefixID() + "header_" + header.indicatorID);
+            let elVHeader = document.getElementById("Vheader_" + header.indicatorID);
+            let arrRGB = [];  //convert from hex to RGB
+            for (let i = 1; i < 7; i += 2) {
+                arrRGB.push(parseInt(bg_color.slice(i, i + 2), 16));
+            }
+            let maxVal = Math.max(arrRGB[0],arrRGB[1],arrRGB[2]); //IE dies with spread op
+            let sum = arrRGB.reduce(function(total, currentVal){
+                return total + currentVal;
+            });
+            //pick text color based on bgcolor, apply to headers
+            let textColor = maxVal < 128 || (sum < 350 && arrRGB[1] < 225) ? 'white' : 'black';
+            elHeader.style.setProperty('background-color', bg_color);
+            elVHeader.style.setProperty('background-color', bg_color);
+            elHeader.style.setProperty('color', textColor);
+            elVHeader.style.setProperty('color', textColor);
+        }
+    });
+}
+
+function editLabels_down(id) {
+    var row = $('#sortID_' + id);
+    row.next().after(row);
+}
+
+function editLabels_up(id) {
+    var row = $('#sortID_' + id);
+    row.prev().before(row);
+}
+
+function editLabels() {
+    dialog.setTitle('Edit Labels');
+
+    var buffer = '<table id="labelSorter">';
+
+    if (Object.keys(indicatorSort).length !== 0) {
+        resSelectList.sort(function(a, b) {
+            var sortA = indicatorSort[a] == undefined ? 0 : indicatorSort[a];
+            var sortB = indicatorSort[b] == undefined ? 0 : indicatorSort[b];
+
+            if(sortA < sortB) {
+                return -1
+            }
+            if(sortB < sortA) {
+                return 1;
+            }
+            return 0;
+        });
+    }
+
+    for(let i in resSelectList) {
+        if(resIndicatorList[resSelectList[i]] != undefined) {
+            buffer += `<tr id="sortID_${resSelectList[i]}">
+                <td>
+                    <input type="color" id="colorPicker${resSelectList[i]}" value="#d1dfff" style="height: 26px;" />
+                    <input type="text" style="min-width: 400px" id="id_${resSelectList[i]}" value="${resIndicatorList[resSelectList[i]]}"></input>
+                </td>
+                <td>
+                    <button class="buttonNorm" onclick="editLabels_down(${resSelectList[i]});"><img src="./dynicons/?img=go-down_red.svg&w=16" /></button>
+                    <button class="buttonNorm" onclick="editLabels_up(${resSelectList[i]});"><img src="./dynicons/?img=go-up.svg&w=16" /></button>
+                </td>
+                </tr>`;
+        }
+    }
+    buffer += '</table>';
+    dialog.setContent(buffer);
+    dialog.show();
+
+    resSelectList.map(function(checkedIndicator) {
+        if(resIndicatorList[checkedIndicator] != undefined) {
+            let elInput = document.getElementById("colorPicker" + checkedIndicator);
+            //update inputs and tempColors to the current colors if they have been set
+            if (gridColorData.hasOwnProperty(checkedIndicator)){
+                elInput.value = gridColorData[checkedIndicator];
+                tempColorData[checkedIndicator] = gridColorData[checkedIndicator]; //primitive
+            }
+            //update temp color object on change
+            elInput.addEventListener('change', function () {
+                tempColorData[checkedIndicator] = elInput.value;
+            });
+        }
+    });
+
+    dialog.setSaveHandler(function() {
+        $('#labelSorter tr').each(function(i) {
+            var curID = this.id.substr(7);
+            indicatorSort[curID] = i + 1;
+        });
+        var tmp = document.createElement('div');
+        var temp;
+        for(let i in resSelectList) {
+            if(resIndicatorList[resSelectList[i]] != undefined) {
+                temp = $('#id_' + resSelectList[i]).val();
+                tmp.innerHTML = temp;
+                temp = tmp.textContent || tmp.innerText || '';
+                temp = temp.replace(/[^\040-\176]/g, '');
+                resIndicatorList[resSelectList[i]] = temp;
+            }
+        }
+        gridColorData = Object.assign({ }, tempColorData);
+        if(Object.keys(gridColorData).length !== 0) {
+            updateHeaderColors();
+            let baseURL = window.location.href.substr(0, window.location.href.indexOf('&'));
+            buildURLComponents(baseURL);
+        }
+        tempColorData = Object.assign({ }, gridColorData);
+
+        $('#generateReport').click();
+        dialog.hide();
+    });
+}
+
+function isSearchingDeleted(searchObj) {
+    // check if the user explicitly wants to find deleted requests
+    var t = searchObj.getLeafFormQuery().getQuery();
+    var searchDeleted = false;
+    for(let i in t.terms) {
+        if(t.terms[i].id === 'stepID'
+            && t.terms[i].match === 'deleted'
+            && t.terms[i].operator === '=') {
+
+            return true;
+        }
+    }
+    return false;
+}
+
+function sortHeaders(a, b) {
+    a.sort = a.sort == undefined ? 0 : a.sort;
+    b.sort = b.sort == undefined ? 0 : b.sort;
+    if(a.sort < b.sort) {
+        return -1
+    }
+    if(b.sort < a.sort) {
+        return 1;
+    }
+    return 0;
+}
+
+function openShareDialog() {
+    var pwd = document.URL.substr(0,document.URL.lastIndexOf('?'));
+    var reportLink = document.URL.substr(document.URL.lastIndexOf('?'));
+
+    dialog_message.setTitle('Share Report');
+    dialog_message.setContent('<p>This link can be shared to provide a live view into this report.</p>'
+                            + '<br /><textarea id="reportLink" style="width: 95%; height: 100px">'+ pwd + reportLink +'</textarea>'
+                            + '<button id="prepareEmail" type="button" class="buttonNorm"><img src="dynicons/?img=internet-mail.svg&w=32" alt="Email report" /> Email Report</button> '
+                            + '<br /><br /><p>Access rules are automatically applied based on the form and workflow configuration.</p>');
+    dialog_message.show();
+    $('#reportLink').on('click', function() {
+        $('#reportLink').select();
+    })
+
+    $('#prepareEmail').on('click', function() {
+        prepareEmail($('#reportLink').html());
+    });
+/*
+    $.ajax({
+        type: 'POST',
+        url: './api/open/report',
+        data: {data: reportLink,
+            CSRFToken: CSRFToken}
+    })
+    .then(function(res) {
+        $('#reportLink').html(pwd + 'open.php?report=' + res);
+    });*/
+}
+
+function showJSONendpoint() {
+    var pwd = document.URL.substr(0,document.URL.lastIndexOf('?'));
+    leafSearch.getLeafFormQuery().setLimit(0, 10000);
+    var queryString = JSON.stringify(leafSearch.getLeafFormQuery().getQuery());
+    var jsonPath = pwd + leafSearch.getLeafFormQuery().getRootURL() + 'api/form/query/?q=' + queryString;
+    var powerQueryURL = MS_COMPAT_URL + window.location.pathname;
+
+    dialog_message.setTitle('Data Endpoints');
+    dialog_message.setContent('<p>This provides a live data source for custom dashboards or automated programs.</p><p><b>A configurable limit of 10,000 records has been preset</b>.</p><br />'
+                           + '<button id="shortenLink" class="buttonNorm" style="float: right">Shorten Link</button>'
+                           + '<button id="expandLink" class="buttonNorm" style="float: right; display: none">Expand Link</button>'
+                           + '<select id="format">'
+                           + '<option value="json">JSON</option>'
+                           + '<option value="htmltable">HTML Table</option>'
+                           + '<option value="jsonp">JSON-P</option>'
+                           + '<option value="csv">CSV</option>'
+                           + '<option value="xml">XML</option>'
+                           + '<option value="debug">Plaintext</option>'
+                           + '<option value="x-visualstudio">Visual Studio (testing)</option>'
+                           + '</select>'
+                           + '<span id="formatStatus" style="background-color:green; padding:5px 5px; color:white; display:none;"></span>'
+                           + '<br /><div id="exportPathContainer" contenteditable="true" style="border: 1px solid gray; padding: 4px; margin-top: 4px; width: 95%; height: 100px; word-break: break-all;"><span id="exportPath">'+ jsonPath +'</span><span id="exportFormat"></span></div>'
+                           + '<a href="./api/form/indicator/list?format=htmltable&sort=indicatorID" target="_blank">Data Dictionary Reference</a>'
+                           + '<br /><br />'
+                           + '<fieldset>'
+                           + '<legend>Options</legend>'
+                           + '<input id="msCompatMode" type="checkbox" /><label for="msCompatMode">Use compatibility mode (Excel, Access, etc.)</label>'
+                           + '</fieldset>');
+
+    $('#msCompatMode').on('click', function() {
+        $('#shortenLink').click();
+
+    });
+
+    function setExportFormat() {
+        if($('#shortenLink').css('display') === 'none') {
+            $('#exportFormat').html('?');
+        }
+        else {
+            $('#exportFormat').html('&');
+        }
+
+
+        switch($('#format').val()) {
+            case 'json':
+                $('#exportFormat').html('');
+                break;
+            default:
+                $('#exportFormat').append('format=' + $('#format').val());
+                $("#formatStatus").show().text("Format changed to " + $('#format').val());
+                $("#formatStatus").fadeOut(3000);
+                break;
+        }
+    }
+
+    $('#format').on('change', function() {
+        setExportFormat();
+    });
+
+    $('#expandLink').on('click', function() {
+        $('#expandLink').css('display', 'none');
+        $('#shortenLink').css('display', 'inline');
+        $('#exportPath').html(jsonPath);
+        $('#exportPath').off();
+        setExportFormat();
+    });
+
+    $('#shortenLink').on('click', function() {
+        $('#shortenLink').css('display', 'none');
+        $('#exportPath').on('focus', function() {
+            document.execCommand("selectAll", false, null);
+        });
+        $.ajax({
+            type: 'POST',
+            url: './api/open/form/query',
+            data: {data: queryString,
+                CSRFToken: CSRFToken}
+        })
+        .then(function(res) {
+            $('#exportPath').html(pwd + leafSearch.getLeafFormQuery().getRootURL() + 'api/open/form/query/_' + res);
+           if($('#msCompatMode').is(':checked')) {
+                $('#expandLink').css('display', 'none');
+                $('#exportPath').html(powerQueryURL + 'api/open/form/query/_' + res);
+            }
+            else {
+                $('#expandLink').css('display', 'inline');
+            }
+            setExportFormat();
+        });
+    });
+
+    // set defaults for IE
+    if (navigator.msSaveOrOpenBlob) {
+        $('#msCompatMode').click();
+    }
+    dialog_message.show();
+}
+
+/**
+ * Purpose: Update Request Titles
+*/
+
+ function changeTitle(form_data, current_title) {
+    dialog.setContent('<label for="recordTitle"><b>Report Title</b></label><br/><input type="text" id="recordTitle" style="width: 250px" name="recordTitle" value="' + current_title + '" /><input type="hidden" id="CSRFToken" name="CSRFToken" value="<!--{$CSRFToken}-->" />');
+    dialog.show();
+    dialog.setSaveHandler(function() {
+        $.ajax({
+            type: 'POST',
+            url: 'api/form/' + form_data.recordID + '/title',
+            data: {title: $('#recordTitle').val(),
+                    CSRFToken: '<!--{$CSRFToken}-->'},
+            success: function(res) {
+                if(res != null) {
+                    $('#' + form_data.cellContainerID).fadeOut(400);
+                    $('#' + form_data.cellContainerID).empty().html(res);
+                    $('#' + form_data.cellContainerID).fadeIn(400);
+
+                }
+                dialog.hide();
+            }
+        });
+    });
+}
+
+/**
+ * Purpose: Create New Row Requests
+ * @param catID - Form ID passing in for new request
+ * @return - Creates new request inline on grid
+ */
+function createRequest(catID) {
+    if (!clicked) {
+        $('#newRecordWarning').css('display', 'none');
+        catID = catID || 'strCatID';
+        const portalAPI = LEAFRequestPortalAPI();
+        portalAPI.setBaseURL('./api/?a=');
+        portalAPI.setCSRFToken(CSRFToken);
+
+        if (catID !== 'strCatID') {
+            portalAPI.Forms.newRequest(
+                catID,
+                    {title: 'untitled'},
+                function (recordID) {
+                    recordID = recordID || 0;
+                    //Type number. Sent back on success (UID column of report builder)
+                    if (recordID > 0) {
+                        newRecordID = parseInt(recordID);  //global
+                        $('#generateReport').click();
+                        dialog.hide();
+                        //styling to hilite row for short / simple queries
+                        setTimeout(function () {
+                            let el_ID = grid.getPrefixID() + "tbody_tr" + recordID;
+                            let newRow = document.getElementById(el_ID);
+                            if (newRow !== null) { //null if query > .75s or if the query does not return the record created
+                                newRow.style.backgroundColor = 'rgb(254, 255, 209)';
+                            }
+                        }, 750);
+                    }
+                },
+                function (error) {
+                    if (error) {
+                        alert('New Request could not be processed');
+                        dialog.hide();
+                    }
+                }
+            );
+        }
+    }
+    clicked = true;
+}
+
+
+var url, urlQuery, urlIndicators;
+let urlColorData = 'str';
+var leafSearch;
+var headers = [];
+var t_inIndicators;
+var isNewQuery = false;
+var dialog, dialog_message, dialog_confirm;
+var indicatorSort = {}; // object = indicatorID : sortID
+var grid;
+let gridColorData = {}; //object updated with id: color
+let tempColorData = {}; //object updated with id: color
+let sortPreference = {}; // store current sorting preference
+let isOneFormType = false;
+
+/**
+ * Purpose: Check if only one type of form could logically be returned and,
+ * if so, update global variables isOneFormType (bool) and categoryID (string).
+ * @param searchQueryTerms - variable with result of leafSearch.getLeafFormQuery().getQuery().terms (array)
+ */
+function checkIfOneTypeSearchedAndUpdate(searchQueryTerms) {
+    searchQueryTerms = searchQueryTerms || 0;
+    isOneFormType = false;   //global
+    categoryID = 'strCatID'; //global
+    if (searchQueryTerms !== 0 && searchQueryTerms.length > 0) {
+        let boolGateCheck = false;
+        let categoriesSearched = searchQueryTerms.filter(function (term) {
+            return term.id === "categoryID";
+        });
+
+        //search must be limited to one Type, and its operator must be "=", additionally search differs based on location:
+        //If Type is the first criteria, all gates must be AND. If not, only its own gate must be AND.
+        //example: 'type IS <form> OR title is <title>', VS 'title IS <title> OR <other search> AND type IS <form>'
+        if (categoriesSearched.length === 1 && categoriesSearched[0].operator === "=") {
+            if (searchQueryTerms[0].id === "categoryID") {  //if it's the first search criteria
+                boolGateCheck = searchQueryTerms.every(function (term) {
+                    return term.gate === "AND";
+                });
+            } else {
+                boolGateCheck = (categoriesSearched[0].gate === "AND");
+            }
+            if (boolGateCheck) {
+                isOneFormType = true; //global
+                categoryID = categoriesSearched[0].match; //global
+            }
+        }
+    }
+}
+
+var version = 3;
+/* URL formats
+    * v1 - base64
+    * v2 - lz-string in base64
+    * v3 - uses getData() from formQuery.js
+*/
+
+/**
+ * Generates a url based on the current report preferences
+ * @param baseURL URL of this script, without parameters
+ * @param update (optional) bool - update an existing URL
+ */
+function buildURLComponents(baseURL, update){
+    url = baseURL + '&v='+ version + '&query=' + encodeURIComponent(urlQuery) + '&indicators=' + encodeURIComponent(urlIndicators);
+
+    if(update != undefined) {
+        let urlParams = new URLSearchParams(window.location.search);
+        url = baseURL + '&v='+ version + '&query=' + urlParams.get('query') + '&indicators=' + urlParams.get('indicators');
+    }
+
+    if (Object.keys(gridColorData).length !== 0){
+        urlColorData = LZString.compressToBase64(JSON.stringify(gridColorData));
+        url += '&colors=' + encodeURIComponent(urlColorData);
+    }
+    if(Object.keys(sortPreference).length != 0) {
+        let urlSortPreference = LZString.compressToBase64(JSON.stringify(sortPreference));
+        url += '&sort=' + encodeURIComponent(urlSortPreference);
+    }
+    if($('#reportTitle').val() != '') {
+        url += '&title=' + encodeURIComponent(btoa($('#reportTitle').val()));
+    }
+    window.history.pushState('', '', url);
+}
+
+function scrubHTML(input) {
+    let t = document.createElement('div');
+    t.innerHTML = input;
+    return t.innerText;
+}
+
+var clicked = false;
+var newRecordID = 0;
+$(function() {
+	dialog = new dialogController('xhrDialog', 'xhr', 'loadIndicator', 'button_save', 'button_cancelchange');
+	dialog_confirm = new dialogController('confirm_xhrDialog', 'confirm_xhr', 'confirm_loadIndicator', 'confirm_button_save', 'confirm_button_cancelchange');
+    dialog_message = new dialogController('genericDialog', 'genericDialogxhr', 'genericDialogloadIndicator', 'genericDialogbutton_save', 'genericDialogbutton_cancelchange');
+    dialog_ok = new dialogController('ok_xhrDialog', 'ok_xhr', 'ok_loadIndicator', 'confirm_button_ok', 'confirm_button_cancelchange');
+    leafSearch = new LeafFormSearch('searchContainer');
+    leafSearch.setJsPath('<!--{$app_js_path}-->');
+    leafSearch.setOrgchartPath('<!--{$orgchartPath}-->');
+    leafSearch.renderUI();
+
+    $('#' + leafSearch.getPrefixID() + 'searchIcon').toggle();
+
+    $('#' + leafSearch.getPrefixID() + 'advancedSearchButton').click();
+    $('#' + leafSearch.getPrefixID() + 'advancedOptions').css('border', '0');
+    $('#' + leafSearch.getPrefixID() + 'advancedOptionsClose').css('visibility', 'hidden');
+    $('#' + leafSearch.getPrefixID() + 'advancedOptions>legend').css('display', 'none');
+    $('#' + leafSearch.getPrefixID() + 'advancedSearchApply').html('Next Step <img src="dynicons/?img=go-next.svg&w=32" alt="next step" />');
+
+    $('#' + leafSearch.getPrefixID() + 'advancedSearchApply').off();
+
+    // parse URL params
+    let params = new URLSearchParams(document.location.search);
+    for(const key of params.keys()) {
+        params.set(key, scrubHTML(params.get(key)));
+    }
+    
+    if(params.get('query') != null
+      	&& params.get('indicators') != null) {
+        $('#step_1').css('display', 'none');
+    }
+    
+    
+    // Step 1
+    $('#' + leafSearch.getPrefixID() + 'advancedSearchApply').on('click', function() {
+        $('#step_2').fadeIn(400);
+        $('#step_1').slideUp(400);
+
+        // hide data fields that don't match forms selected by the user
+        leafSearch.generateQuery();
+        var tTerms = leafSearch.getLeafFormQuery().getQuery().terms;
+        var filteredCategories = [];
+        var showOptionCancelled = false;
+
+        for(let i in tTerms) {
+            if(tTerms[i].id === 'categoryID'
+                && tTerms[i].operator === '=') {
+                filteredCategories.push(tTerms[i].match);
+            }
+
+            // hide dateCancelled option unless it's being searched for
+            if(tTerms[i].id === 'stepID'
+                && tTerms[i].operator === '='
+                && tTerms[i].match === 'deleted') {
+                showOptionCancelled = true;
+            }
+        }
+        if(filteredCategories.length > 0) {
+            $('.category').css('display', 'none');
+            for(let i in filteredCategories) {
+                $('.' + filteredCategories[i]).css('display', 'inline');
+            }
+        }
+        else {
+            $('.category').css('display', 'inline');
+        }
+
+        if(showOptionCancelled) {
+            $('#option_dateCancelled').css('display', 'block');
+        }
+        else {
+            $('#option_dateCancelled').css('display', 'none');
+        }
+    });
+
+    if(params.get('query') == null || params.get('indicators') == null) {
+        loadSearchPrereqs();
+        isNewQuery = true;
+    }
+
+    // Step 2
+    var selectedIndicators = [];
+    grid = new LeafFormGrid('results');
+    grid.enableToolbar();
+    grid.setPostSortRequestFunc((key, order) => {
+        sortPreference = {key: key, order: order};
+        let baseURL = window.location.href.substr(0, window.location.href.indexOf('&'));
+        buildURLComponents(baseURL, true);
+    });
+    var extendedToolbar = false;
+    $('#generateReport').off();
+    $('#generateReport').on('click', function() {
+        $('#results').fadeIn(700);
+        $('#saveLinkContainer').fadeIn(700);
+        $('#step_2').slideUp(700);
+        $('#newRecordWarning').css('display', 'none');
+        if(isNewQuery) {
+            leafSearch.generateQuery();
+
+            if(!isSearchingDeleted(leafSearch)) {
+                leafSearch.getLeafFormQuery().addTerm('deleted', '=', 0);
+            }
+            leafSearch.getLeafFormQuery().join('service');
+            headers = [];
+        }
+        else if(!isSearchingDeleted(leafSearch)) {
+            leafSearch.getLeafFormQuery().addTerm('deleted', '=', 0);
+        }
+
+        selectedIndicators = [];
+        resSelectList = [];
+        $('.leaf_check:checked').each(function() {
+            let gridParent = this.attributes.gridparent?.value;
+            if (gridParent !== undefined) {
+                let dest = resSelectList.indexOf(gridParent);
+
+                if (dest !== -1) {
+                    resSelectList[dest] = [resSelectList[dest]];
+                } else {
+                    for (let i in resSelectList) {
+                        if (resSelectList[i][0] === gridParent) {
+                            dest = i;
+                        }
+                    }
+                }
+                resSelectList[dest].push(this.value);
+            } else {
+                resSelectList.push(this.value);
+            }
+        });
+
+        resSelectList.sort(function(a, b) {
+            var sortA = indicatorSort[a] == undefined ? 0 : indicatorSort[a];
+            var sortB = indicatorSort[b] == undefined ? 0 : indicatorSort[b];
+
+            if(sortA < sortB) {
+                return -1
+            }
+            if(sortB < sortA) {
+                return 1;
+            }
+            return 0;
+        });
+
+        for(let i in resSelectList) {
+            let temp = {};
+            if (Array.isArray(resSelectList[i])) {
+                temp.indicatorID = resSelectList[i][0];
+                temp.cols = [];
+                for (let j = 1; j < resSelectList[i].length; j++) {
+                    temp.cols.push(resSelectList[i][j]);
+                }
+            } else {
+                temp.indicatorID = resSelectList[i];
+            }
+            temp.name = resIndicatorList[temp.indicatorID] != undefined ? resIndicatorList[temp.indicatorID] : '';
+            temp.sort = indicatorSort[temp.indicatorID] == undefined ? 0 : indicatorSort[temp.indicatorID];
+            var tmp = document.createElement('div');
+            tmp.innerHTML = temp.name;
+            temp.name = tmp.textContent || tmp.innerText || '';
+            temp.name = temp.name.replace(/[^\040-\176]/g, '');
+            if($.isNumeric(resSelectList[i][0]) || $.isNumeric(resSelectList[i])) {
+                    headers.push(temp);
+                    leafSearch.getLeafFormQuery().getData(temp.indicatorID);
+            }
+            else {
+                addHeader(temp.indicatorID);
+            }
+            selectedIndicators.push(temp);
+        }
+        headers.sort(sortHeaders);
+        selectedIndicators.sort(sortHeaders);
+        grid.setHeaders(headers);
+
+        function renderGrid(res) {
+            grid.setDataBlob(res);
+
+            var tGridData = [];
+            for(let i in res) {
+                tGridData.push(res[i]);
+            }
+
+            if(params.get('v') >= 3) {
+                grid.setData(tGridData);
+                let sortKey = 'recordID';
+                let sortDirection = 'desc';
+                if(sortPreference.key != undefined && sortPreference.order != undefined) {
+                    sortKey = sortPreference.key;
+                    sortDirection = sortPreference.order;
+                }
+                grid.sort(sortKey, sortDirection);
+                grid.renderBody();
+            }
+            else {
+                let recordIDs = '';
+                for (let i in res) {
+                    recordIDs += res[i].recordID + ',';
+                }
+                grid.loadData(recordIDs);
+            }
+            let gridResults = grid.getCurrentData();
+            let filteredGridResults = gridResults.filter(function(r) {
+                return r.categoryID != undefined;
+            });
+            //if catID info is available for the results, it can be used to determine form type.
+            if (filteredGridResults.length > 0) {
+                categoryID = filteredGridResults[0].categoryID;
+                isOneFormType = filteredGridResults.every(function(fr) {
+                    return fr.categoryID === categoryID;
+                });
+            }
+            if (isOneFormType){
+                $('#newRequestButton').css('display', 'inline-block');
+            } else {
+                $('#newRequestButton').css('display', 'none');
+            }
+            let reportHasNewRecord = gridResults.some(function(obj){
+                return obj.recordID === newRecordID;
+            })
+            if (newRecordID !== 0 && clicked === true && !reportHasNewRecord){
+                $('#newRecordWarning').css('display', 'block');
+            }
+            clicked = false; //global to reduce dblclicks
+        }
+
+        let batchSize = 1000;
+        let offset = 0;
+        let queryResult = {};
+        let abortLoad = false;
+        let masquerade = '';
+        let urlParams = new URLSearchParams(window.location.search);
+        let addMasqueradeParam = '';
+        urlMasqueradeParam = urlParams.get('masquerade');
+        if(urlMasqueradeParam == 'nonAdmin') {
+            addMasqueradeParam = '&masquerade=nonAdmin';
+        }
+
+        leafSearch.getLeafFormQuery().setLimit(offset, batchSize);
+        leafSearch.getLeafFormQuery().setExtraParams('&x-filterData=recordID,'+ Object.keys(filterData).join(',') + addMasqueradeParam);
+
+        leafSearch.getLeafFormQuery().onSuccess(function(res, resStatus, resJqXHR) {
+            queryResult = Object.assign(queryResult, res);
+
+            if((Object.keys(res).length == batchSize
+                    || resJqXHR.getResponseHeader('leaf-query') == 'continue')
+                && !abortLoad) {
+                $('#reportStats').html(`Loading ${offset}+ records <button id="btn_abort" class="buttonNorm">Stop</button>`);
+                $('#btn_abort').on('click', function() {
+                    abortLoad = true;
+                });
+                offset += batchSize;
+                leafSearch.getLeafFormQuery().setLimit(offset, batchSize);
+                leafSearch.getLeafFormQuery().execute();
+            }
+            else {
+                let partialLoad = '';
+                if(abortLoad) {
+                    partialLoad = ' (partially loaded)';
+                }
+                $('#reportStats').html(`${Object.keys(queryResult).length} records${partialLoad}`);
+                renderGrid(queryResult);
+            }
+        });
+
+        // get data
+        leafSearch.getLeafFormQuery().execute();
+
+        // create save link once
+        if(!extendedToolbar) {
+            $('#' + grid.getPrefixID() + 'gridToolbar').prepend('<button type="button" class="buttonNorm" onclick="openShareDialog()"><img src="dynicons/?img=internet-mail.svg&w=32" alt="share report" /> Share Report</button> ');
+            $('#' + grid.getPrefixID() + 'gridToolbar').prepend('<button type="button" id="editLabels" class="buttonNorm" onclick="editLabels()"><img src="dynicons/?img=accessories-text-editor.svg&w=32" alt="email report" /> Edit Labels</button> ');
+
+            $('#' + grid.getPrefixID() + 'gridToolbar').css('width', '100%');
+            $('#' + grid.getPrefixID() + 'gridToolbar').prepend('<button type="button" class="buttonNorm" id="editReport"><img src="dynicons/?img=gnome-applications-science.svg&w=32" alt="Modify search" /> Modify Search</button> ');
+            $('#' + grid.getPrefixID() + 'gridToolbar').append(' <button type="button" class="buttonNorm" onclick="showJSONendpoint();"><img src="dynicons/?img=applications-other.svg&w=16" alt="Icon for JSON endpoint viewer" /> JSON</button> ');
+            $('#' + grid.getPrefixID() + 'gridToolbar').prepend('<button id="newRequestButton" class="buttonNorm"  style="position: absolute; bottom: 0; left: 0" type="button" onclick="createRequest(categoryID)"><img src="dynicons/?img=list-add.svg&amp;w=16" alt="Next" />Create Row</button><p id="newRecordWarning" style="display: none; position: absolute; top: 0; left: 0; color:#d00">A new request was created, but it was not returned by the current query.</p>');
+            extendedToolbar = true;
+
+
+            $('#editReport').on('click', function() {
+                grid.stop();
+                isNewQuery = true;
+                $('#reportTitleDisplay').css('display', 'none');
+                $('#reportTitle').css('display', 'block');
+                $('#newRequestButton').css('display', 'none');
+                loadSearchPrereqs();
+                $('#saveLinkContainer').slideUp(700);
+                $('#results').fadeOut(700);
+                $('#step_1').fadeIn(700);
+            });
+        }
+
+        if($.isEmptyObject(resIndicatorList)) {
+            $('#editLabels').css('display', 'none');
+        }
+        else {
+            $('#editLabels').css('display', 'inline');
+        }
+        let leafSearchQuery = leafSearch.getLeafFormQuery().getQuery();
+        checkIfOneTypeSearchedAndUpdate(leafSearchQuery.terms);
+
+        urlQuery = LZString.compressToBase64(JSON.stringify(leafSearchQuery));
+        urlIndicators = LZString.compressToBase64(JSON.stringify(selectedIndicators));
+
+        if(isNewQuery) {
+            baseURL = '';
+            if(window.location.href.indexOf('&') === -1) {
+                baseURL = window.location.href;
+            }
+            else {
+                baseURL = window.location.href.substr(0, window.location.href.indexOf('&'));
+            }
+            buildURLComponents(baseURL);
+
+            $('#reportTitle').on('keyup', function() {
+                buildURLComponents(baseURL, true);
+            });
+        }
+        else {
+            url = window.location.href;
+        }
+        //reapply colors if user has moved away from reports view
+        if(Object.keys(gridColorData).length !== 0){
+            updateHeaderColors(gridColorData);
+        }
+    });
+
+
+    function loadReport() {
+        let inQuery;
+        let inIndicators;
+        let title = '';
+
+        title = atob(scrubHTML(params.get('title')));
+        title = title.replace(/[^\040-\176]/g, '');
+        title = title.replace(/</g, '&lt;');
+        title = title.replace(/>/g, '&gt;');
+        $('#reportTitleDisplay').html(title);
+        $('#reportTitle').css('display', 'none');
+        $('#reportTitle').off();
+        $('#reportTitle').val(title);
+        $('#reportTitleDisplay').on('click', function() {
+            $('#reportTitleDisplay').css('display', 'none');
+            $('#reportTitle').css('display', 'inline');
+            $('#reportTitle').on('keyup', function() {
+                baseURL = window.location.href.substr(0, window.location.href.indexOf('&title='));
+                url = baseURL + '&title=' + encodeURIComponent(btoa($('#reportTitle').val()));
+                window.history.pushState('', '', url);
+            });
+        });
+        try {
+            if(params.get('v') >= 2) {
+                let query = scrubHTML(params.get('query'));
+                let indicators = scrubHTML(params.get('indicators'));
+                let colors = scrubHTML(params.get('colors'));
+                query = query.replace(/ /g, '+');
+                indicators = indicators.replace(/ /g, '+');
+                colors = colors.replace(/ /g, '+');
+                inQuery = JSON.parse(LZString.decompressFromBase64(query));
+                //if refreshed or not a new report
+                checkIfOneTypeSearchedAndUpdate(inQuery.terms);
+
+                t_inIndicators = JSON.parse(LZString.decompressFromBase64(indicators));
+                let queryColors = JSON.parse(LZString.decompressFromBase64(colors));
+                if (queryColors !== null) {
+                    gridColorData = queryColors;
+                    updateHeaderColors(gridColorData);
+                }
+
+                let urlParams = new URLSearchParams(window.location.search);
+                urlSortParam = urlParams.get('sort');
+                if(urlSortParam != null) {
+                    sortPreference = JSON.parse(LZString.decompressFromBase64(urlSortParam));
+                }
+            }
+            else {
+                inQuery = JSON.parse(atob('<!--{$query|escape:"html"}-->'));
+                t_inIndicators = JSON.parse(atob('<!--{$indicators|escape:"html"}-->'));
+            }
+            inIndicators = [];
+            for(let i in t_inIndicators) {
+                var temp = {};
+                if($.isNumeric(t_inIndicators[i].indicatorID)) {
+                    // add selected columns to payload in case of grid indicator
+                    if (Array.isArray(t_inIndicators[i].cols)) {
+                        temp.cols = t_inIndicators[i].cols;
+                    }
+                    temp.indicatorID = parseInt(t_inIndicators[i].indicatorID);
+                    temp.name = t_inIndicators[i].name.replace(/[^\040-\176]/g, '');
+                    temp.name = temp.name.replace(/</g, '&lt;');
+                    temp.name = temp.name.replace(/>/g, '&gt;');
+                    inIndicators.push(temp);
+                }
+                else {
+                    addHeader(t_inIndicators[i].indicatorID);
+                }
+            }
+            leafSearch.getLeafFormQuery().setQuery(inQuery);
+
+            // We usually don't want to see deleted requests, but this parameter still needs to be
+            // passed into the API. To simplify the user interface, the parameter is removed before
+            // rendering the view. Explicit searches for deleted requests are not affected.
+            if(!isSearchingDeleted(leafSearch)) {
+                for(let i in inQuery.terms) {
+                    if(inQuery.terms[i].id == 'deleted'
+                        && inQuery.terms[i].operator == '='
+                        && parseInt(inQuery.terms[i].match) == 0) {
+                        inQuery.terms.splice(i, 1);
+                    }
+                }
+            }
+            leafSearch.renderPreviousAdvancedSearch(inQuery.terms);
+            headers = headers.concat(inIndicators);
+            $('#step_1').slideUp(700);
+            $('#generateReport').click();
+        }
+        catch(err) {
+            alert('Invalid report');
+        }
+    }
+
+    if(params.get('query') != null && params.get('indicators') != null) {
+        loadReport();
+    }
+});
+</script>
+
+```

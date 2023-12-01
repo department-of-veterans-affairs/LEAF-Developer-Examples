@@ -19,7 +19,7 @@ The following is a list of commonly used APIs, their parameters, and examples of
 
 
 ### Records ([api/form](https://github.com/department-of-veterans-affairs/LEAF/blob/master/LEAF_Request_Portal/api/controllers/FormController.php))
-#### Create a new record - [Example](https://github.com/department-of-veterans-affairs/LEAF-Developer-Examples/blob/master/forms/create_new_form.tpl)
+#### Create a new record - [Example](https://github.com/department-of-veterans-affairs/LEAF-Developer-Examples/blob/master/forms/create_new_request.tpl)
 POST api/form/new
   ```
   CSRFToken       string (required)
@@ -40,3 +40,10 @@ POST api/form/[recordID]
   FIELD_ID                         Many FIELD_IDs can be added simultaneously
   ```
   Special considerations: The "grid" input format expects data to be formatted as in [this example](https://github.com/department-of-veterans-affairs/LEAF-Developer-Examples/blob/master/forms/update_grid_formatted_field.tpl).
+
+#### Cancel a record
+POST api/form/[recordID]/cancel - [Example](https://github.com/department-of-veterans-affairs/LEAF-Developer-Examples/blob/master/forms/cancel_request.md)
+  ```
+  CSRFToken      string (required)
+  comment        string (optional)
+  ```

@@ -18,7 +18,7 @@ Add a logic gate to check for input that starts with "RITM":
         if(txt == '') {
             query.addTerm('title', 'LIKE', '*');
         }
-        else if() {
+        else if(txt.indexOf('RITM') == 0) {
             query.addDataTerm('data', ID_OF_THE_FIELD, 'MATCH', txt, 'OR'); // Replace ID_OF_THE_FIELD
             // query.addDataTerm('data', 0, 'MATCH', txt, 'OR'); // example to search all data fields
         }

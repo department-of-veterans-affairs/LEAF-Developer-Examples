@@ -19,8 +19,8 @@ Add a logic gate to check for input that starts with "RITM":
             query.addTerm('title', 'LIKE', '*');
         }
         else if(txt.indexOf('RITM') == 0) {
-            query.addDataTerm('data', ID_OF_THE_FIELD, 'MATCH', txt, 'OR'); // Replace ID_OF_THE_FIELD
-            // query.addDataTerm('data', 0, 'MATCH', txt, 'OR'); // example to search all data fields
+            query.addDataTerm('data', ID_OF_THE_FIELD, 'MATCH', txt, 'AND'); // Replace ID_OF_THE_FIELD
+            // query.addDataTerm('data', 0, 'MATCH', txt, 'AND'); // example to search all data fields
         }
         else if(!isNaN(parseFloat(txt)) && isFinite(txt)) { // check if numeric
             query.addTerm('recordID', '=', txt);

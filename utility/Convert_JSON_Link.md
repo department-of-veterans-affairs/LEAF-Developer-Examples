@@ -83,7 +83,7 @@ async function main() {
     	
     	let indicators = [{indicatorID: 'title'}];
     
-    	// convert join terms to header names
+    	// convert join terms to header names used in Report Builder
     	if(query.joins != undefined) {
             query.joins.forEach(join => {
                 let temp = {};

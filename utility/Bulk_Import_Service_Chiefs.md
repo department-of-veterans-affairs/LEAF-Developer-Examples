@@ -90,7 +90,7 @@ async function main() {
             let userQuery = {};
             userQuery.line = i;
             userQuery.serviceID = serviceID;
-            if(email.indexOf('@va.gov') == -1) {
+            if(email.toLowerCase().indexOf('@va.gov') == -1) {
                 userQuery.q = name;
             } else {
                 userQuery.q = email;
@@ -107,7 +107,8 @@ async function main() {
                 	document.querySelector('#progress').innerHTML = 'Checking users... ' + queue.getLoaded();
             		if(result == false) {
                         errors++;
-                        alert('Issue with name or email, check line: ' + userToCheck.line);
+                        alert('Issue with name or email, check line: ' + (parseInt(userToCheck.line) + 1) + ' - ' + userToCheck.q);
+                        queue.setQueue([]);
                     }
                 	else {
                         let user = {};

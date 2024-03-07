@@ -2,6 +2,9 @@
 
 This script provides a simple data visualization which can be useful for surveys.
 
+## Prerequisite:
+1. This file must be loaded in the Report Programmer area, and labeled as "Data_Visualizer"
+
 ```html
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dc/4.2.7/style/dc.min.css" integrity="sha512-t38Qn1jREPvzPvDLgIP2fjtOayaA1KKBuNpNj9BGgiMi+tGLOdvDB+aWLMe2BvokHg1OxRLQLE7qrlLo+A+MLA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js" integrity="sha512-M7nHCiNUOwFt6Us3r8alutZLm9qMt4s9951uo8jqO4UwJ1hziseL6O3ndFyigx6+LREfZqnhHxYjKRJ8ZQ69DQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>

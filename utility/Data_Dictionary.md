@@ -24,7 +24,7 @@ async function getData() {
 
     // Required to initialize data for the grid
     formGrid.setData(Object.keys(indicators).map(key => {
-        indicators[key].recordID = key;
+        indicators[key].recordID = key; // formGrid expects there to be a recordID property that contains unique integers
         return indicators[key];
     }));
     formGrid.setDataBlob(indicators);

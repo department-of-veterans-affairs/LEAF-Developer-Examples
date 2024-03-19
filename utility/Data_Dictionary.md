@@ -40,15 +40,15 @@ async function getData() {
         {name: 'Form Name', indicatorID: 'categoryName', editable: false, callback: function(data, blob) {
             $('#'+data.cellContainerID).html(blob[data.recordID].categoryName);
         }},
-        {name: 'Format', indicatorID: 'format', callback: function(data, blob) {
+        {name: 'Format', indicatorID: 'format', editable: false, callback: function(data, blob) {
             let rawFormat = blob[data.recordID].format;
             let format = rawFormat.split("\n")[0];
             $('#'+data.cellContainerID).html(format);
         }},
-		{name: 'Short Label', indicatorID: 'label', callback: function(data, blob) {
+		{name: 'Short Label', indicatorID: 'label', editable: false, callback: function(data, blob) {
             $('#'+data.cellContainerID).html(blob[data.recordID].description);
         }},
-        {name: 'Name', indicatorID: 'name', callback: function(data, blob) {
+        {name: 'Name', indicatorID: 'name', editable: false, callback: function(data, blob) {
             $('#'+data.cellContainerID).html(blob[data.recordID].name);
         }},
     ]);

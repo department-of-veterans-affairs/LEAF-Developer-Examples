@@ -126,6 +126,11 @@ The main difference between this and the standard Report Builder is that the URL
 const CSRFToken = '<!--{$CSRFToken}-->';
 const MS_COMPAT_URL = 'EXAMPLE.COM'; // compatibility URL for MS auth
 
+function scrubHTML(input) {
+        let t = new DOMParser().parseFromString(input, 'text/html').body;
+        return t.textContent;
+}
+
 function loadWorkflow(recordID, prefixID) {
     dialog_message.setTitle('Apply Action to #' + recordID);
     currRecordID = recordID;
@@ -1132,6 +1137,15 @@ var version = 3;
     * v3 - uses getData() from formQuery.js
 */
 
+// Update window title
+function updateTitle(title) {
+    if(title != '') {
+        let siteName = document.querySelector('#headerDescription').innerText;
+        let siteLocation = document.querySelector('#headerLabel').innerText;
+        document.querySelector('title').innerText = scrubHTML(`${title} - ${siteName} | ${siteLocation}`);
+    }
+}
+
 /**
  * Generates a url based on the current report preferences
  * @param baseURL URL of this script, without parameters
@@ -1154,6 +1168,7 @@ function buildURLComponents(baseURL, update){
         url += '&sort=' + encodeURIComponent(urlSortPreference);
     }
     if($('#reportTitle').val() != '') {
+	updateTitle($('#reportTitle').val());
         url += '&title=' + encodeURIComponent(btoa($('#reportTitle').val()));
     }
     window.history.pushState('', '', url);
@@ -1516,6 +1531,7 @@ $(function() {
                 window.history.pushState('', '', url);
             });
         });
+	updateTitle(title);
         try {
             if(params.get('v') >= 2) {
                 let query = scrubHTML(params.get('query'));

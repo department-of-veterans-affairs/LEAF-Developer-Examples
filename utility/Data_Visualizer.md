@@ -12,12 +12,12 @@ This script provides a simple data visualization which can be useful for surveys
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dc/4.2.7/dc.min.js" integrity="sha512-vIRU1/ofrqZ6nA3aOsDQf8kiJnAHnLrzaDh4ob8yBcJNry7Czhb8mdKIP+p8y7ixiNbT/As1Oii9IVk+ohSFiA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 <style>
-p, li {
-    font-size: 14pt;
+#content p, #content li {
+    font-size: 12pt;
     font-family: 'Source Sans Pro', helvetica;
 }
 .table td {
-    font-size: 14pt;
+    font-size: 12pt;
 }
 
 .dc-chart g.row text {

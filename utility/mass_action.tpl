@@ -7,7 +7,7 @@ function runMassAction() {
 
     let queue = new intervalQueue();    // Create a queue to help facilitate processing mass actions
     queue.setConcurrency(3);            // The browser maximum for network requests is typically 6. This affects how many of your functions can run simultaneously.
-    queue.setWorker(function(item) {    // This is executed for each record. Must return $.ajax or equivalent
+    queue.setWorker(function(item) {    // This is executed for each record. Must return $.ajax or Promise
         document.querySelector('#functionStatus').innerHTML = `Processing ${queue.getLoaded()} of ${totalRecords} records`;
 
         return $.ajax({

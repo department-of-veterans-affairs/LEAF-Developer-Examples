@@ -100,22 +100,22 @@ async function getData() {
         }},
         {name: 'User Email', indicatorID: 32},
         //{name: 'Property on Temporary Loan', indicatorID: 38}, // this would normally show up as a sub-table
-        {name: 'Device EE', indicatorID: 'deviceEE', callback: (data, blob) => {
+        {name: 'Device EE', indicatorID: 'deviceEE', editable: false, callback: (data, blob) => {
             $('#'+data.cellContainerID).html(blob[data.recordID].deviceEE);
         }},
-        {name: 'Serial / IMEI', indicatorID: 'serial', callback: (data, blob) => {
+        {name: 'Serial / IMEI', indicatorID: 'serial', editable: false, callback: (data, blob) => {
             $('#'+data.cellContainerID).html(blob[data.recordID].serial);
         }},
-        {name: 'Type', indicatorID: 'type', callback: (data, blob) => {
+        {name: 'Type', indicatorID: 'type', editable: false, callback: (data, blob) => {
             $('#'+data.cellContainerID).html(blob[data.recordID].type);
         }},
-        {name: 'Manufacturer', indicatorID: 'manufacturer', callback: (data, blob) => {
+        {name: 'Manufacturer', indicatorID: 'manufacturer', editable: false, callback: (data, blob) => {
             $('#'+data.cellContainerID).html(blob[data.recordID].manufacturer);
         }},
-        {name: 'Model', indicatorID: 'model', callback: (data, blob) => {
+        {name: 'Model', indicatorID: 'model', editable: false, callback: (data, blob) => {
             $('#'+data.cellContainerID).html(blob[data.recordID].model);
         }},
-        {name: 'Value', indicatorID: 'value', callback: (data, blob) => {
+        {name: 'Value', indicatorID: 'value', editable: false, callback: (data, blob) => {
             $('#'+data.cellContainerID).html(blob[data.recordID].value);
         }},
 		{name: 'Date Signed', indicatorID: 'step15', editable: false, callback: function(stepID) {

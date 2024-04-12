@@ -1179,12 +1179,6 @@ function buildURLComponents(baseURL, update){
     window.history.pushState('', '', url);
 }
 
-function scrubHTML(input) {
-    let t = document.createElement('div');
-    t.innerHTML = input;
-    return t.innerText;
-}
-
 var clicked = false;
 var newRecordID = 0;
 $(function() {

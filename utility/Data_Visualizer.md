@@ -589,7 +589,6 @@ async function getDataBuildCharts(categoryID, customSearch) {
     let queryFilter = ['recordID', 'submitted', 'stepID', 'stepTitle'];
     fields.forEach(field => {
         query.getData(field.indicatorID);
-        queryFilter.push(`s1.id${field.indicatorID}`);
     });
     query.setExtraParams('&x-filterData=' + queryFilter.join(','));
     

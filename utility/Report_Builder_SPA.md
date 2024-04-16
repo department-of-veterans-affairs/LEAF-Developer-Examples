@@ -127,6 +127,9 @@ const CSRFToken = '<!--{$CSRFToken}-->';
 const MS_COMPAT_URL = 'EXAMPLE.COM'; // compatibility URL for MS auth
 
 function scrubHTML(input) {
+    	if(input == null) {
+            return '';
+        }
         let t = new DOMParser().parseFromString(input, 'text/html').body;
         return t.textContent;
 }
@@ -1544,6 +1547,7 @@ $(function() {
                 checkIfOneTypeSearchedAndUpdate(inQuery.terms);
 
                 t_inIndicators = JSON.parse(LZString.decompressFromBase64(indicators));
+
                 let queryColors = JSON.parse(LZString.decompressFromBase64(colors));
                 if (queryColors !== null) {
                     gridColorData = queryColors;
@@ -1555,10 +1559,6 @@ $(function() {
                 if(urlSortParam != null) {
                     sortPreference = JSON.parse(LZString.decompressFromBase64(urlSortParam));
                 }
-            }
-            else {
-                inQuery = JSON.parse(atob('<!--{$query|escape:"html"}-->'));
-                t_inIndicators = JSON.parse(atob('<!--{$indicators|escape:"html"}-->'));
             }
             inIndicators = [];
             for(let i in t_inIndicators) {
@@ -1598,6 +1598,7 @@ $(function() {
             $('#generateReport').click();
         }
         catch(err) {
+            console.log(err);
             alert('Invalid report');
         }
     }

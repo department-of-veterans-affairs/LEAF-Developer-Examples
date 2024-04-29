@@ -138,7 +138,7 @@ function preparePreview() {
         query.execute();
     });
     leafSearch.init();
-    document.querySelector('#'+ leafSearch.getPrefixID() + 'advancedSearchButton').click();
+    document.querySelector('#'+ leafSearch.getPrefixID() + 'advancedSearchApply').click();
 }
     
 function generateQuery(advSearch) {

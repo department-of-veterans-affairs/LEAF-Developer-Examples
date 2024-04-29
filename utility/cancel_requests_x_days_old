@@ -1,6 +1,7 @@
 <script src="../libs/js/LEAF/intervalQueue.js"></script>
 <script>
-var functionDescription = "Cancel Unsubmitted Requests Older than 30 days";
+    var numDays = 30;
+var functionDescription = "Cancel Unsubmitted Requests Older than " + numDays + " days";
 
 function runMassAction() {
     let totalRecords = Object.keys(selectedRecords).length;
@@ -74,6 +75,12 @@ function preparePreview() {
          {name: 'Title', indicatorID: 'title', editable: false, callback: function(data, blob) {
             $('#'+data.cellContainerID).html(blob[data.recordID].title);
          }},
+         /*{name: 'Service', indicatorID: 'service', editable: false, callback: function(data, blob) {
+             $('#'+data.cellContainerID).html(blob[data.recordID].service);
+             if(blob[data.recordID].userID == '<!--{$userID|unescape|escape:'quotes'}-->') {
+                 $('#'+data.cellContainerID).css('background-color', '#feffd1');
+             }
+         }},*/
          {name: 'Status', indicatorID: 'currentStatus', editable: false, callback: function(data, blob) {
              var waitText = blob[data.recordID].blockingStepID == 0 ? 'Pending ' : 'Waiting for ';
              var status = '';
@@ -147,7 +154,7 @@ function generateQuery(advSearch) {
         }
     }*/
     query.addDataTerm('stepID', '', '!=', 'submitted', 'AND');
-    query.addDataTerm('dateInitiated', '', '<=', getDaysAgo(30), 'AND');
+    query.addDataTerm('dateInitiated', '', '<=', getDaysAgo(numDays), 'AND');
     query.addDataTerm('deleted', '', '=', 0, 'AND');
 }
     

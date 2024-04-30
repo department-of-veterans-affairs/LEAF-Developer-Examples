@@ -1,7 +1,7 @@
 <script src="../libs/js/LEAF/intervalQueue.js"></script>
 <script>
-    var numDays = 30;
-var functionDescription = "Cancel Unsubmitted Requests Older than " + numDays + " days";
+    let numDays = 7;
+let functionDescription = "Cancel Unsubmitted Requests Older than " + numDays + " days";
 
 function runMassAction() {
     let totalRecords = Object.keys(selectedRecords).length;
@@ -17,6 +17,9 @@ function runMassAction() {
             data: {
                 CSRFToken: '<!--{$CSRFToken}-->',
                 comment: 'Canceled by mass action'
+            },
+            error: function(err){
+                console.log(err);
             }
         });
     });
@@ -52,7 +55,7 @@ function ready(func) {
     document.addEventListener("DOMContentLoaded", func);
 }
 
-var selectedRecords = {};
+let selectedRecords = {};
 function preparePreview() {
     query.onSuccess(function(res) {
         selectedRecords = res;
@@ -75,12 +78,6 @@ function preparePreview() {
          {name: 'Title', indicatorID: 'title', editable: false, callback: function(data, blob) {
             $('#'+data.cellContainerID).html(blob[data.recordID].title);
          }},
-         /*{name: 'Service', indicatorID: 'service', editable: false, callback: function(data, blob) {
-             $('#'+data.cellContainerID).html(blob[data.recordID].service);
-             if(blob[data.recordID].userID == '<!--{$userID|unescape|escape:'quotes'}-->') {
-                 $('#'+data.cellContainerID).css('background-color', '#feffd1');
-             }
-         }},*/
          {name: 'Status', indicatorID: 'currentStatus', editable: false, callback: function(data, blob) {
              var waitText = blob[data.recordID].blockingStepID == 0 ? 'Pending ' : 'Waiting for ';
              var status = '';
@@ -114,7 +111,6 @@ function preparePreview() {
             tGridData.push(res[i]);
         }
         grid.setData(tGridData);
-        //grid.sort('recordID', 'desc');
         grid.renderBody();
         grid.announceResults();
 
@@ -144,29 +140,21 @@ function preparePreview() {
 function generateQuery(advSearch) {
     query.clearTerms();
     console.log(advSearch);
-    /*for(var i in advSearch) {
-        if(advSearch[i].id != 'data'
-           && advSearch[i].id != 'dependencyID') {
-            query.addTerm(advSearch[i].id, advSearch[i].operator, advSearch[i].match, advSearch[i].gate);
-        }
-        else {
-            query.addDataTerm(advSearch[i].id, advSearch[i].indicatorID, advSearch[i].operator, advSearch[i].match, advSearch[i].gate);
-        }
-    }*/
+    
     query.addDataTerm('stepID', '', '!=', 'submitted', 'AND');
     query.addDataTerm('dateInitiated', '', '<=', getDaysAgo(numDays), 'AND');
     query.addDataTerm('deleted', '', '=', 0, 'AND');
 }
     
 function getDaysAgo(days){
-    var currentDate = new Date();
+    let currentDate = new Date();
     currentDate.setDate(currentDate.getDate()-days);
-    var twoDigitMonth=((currentDate.getMonth()+1)>=10)? (currentDate.getMonth()+1) : '0' + (currentDate.getMonth()+1);
-    var twoDigitDate=((currentDate.getDate())>=10)? (currentDate.getDate()) : '0' + (currentDate.getDate());
+    let twoDigitMonth=((currentDate.getMonth()+1)>=10)? (currentDate.getMonth()+1) : '0' + (currentDate.getMonth()+1);
+    let twoDigitDate=((currentDate.getDate())>=10)? (currentDate.getDate()) : '0' + (currentDate.getDate());
 
-    var year = currentDate.getFullYear();
+    let year = currentDate.getFullYear();
 
-    var ninetyDaysAgo = twoDigitMonth + "/" + twoDigitDate + "/" + year;
+    let ninetyDaysAgo = twoDigitMonth + "/" + twoDigitDate + "/" + year;
 
     return ninetyDaysAgo;
 }

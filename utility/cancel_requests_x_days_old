@@ -139,7 +139,6 @@ function preparePreview() {
     
 function generateQuery(advSearch) {
     query.clearTerms();
-    console.log(advSearch);
     
     query.addDataTerm('stepID', '', '!=', 'submitted', 'AND');
     query.addDataTerm('dateInitiated', '', '<=', getDaysAgo(numDays), 'AND');

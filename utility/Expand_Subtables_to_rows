@@ -9,15 +9,18 @@ In the example below, the report of all Property Passes contains a subtable with
 let CSRFToken = '<!--{$CSRFToken}-->';
 
 function scrubHTML(input) {
-        let t = new DOMParser().parseFromString(input, 'text/html').body;
-        return t.textContent;
+    if (input == null) {
+        return '';
+    }
+    let t = new DOMParser().parseFromString(input, 'text/html').body;
+    return t.textContent;
 }
 
 function updateTitle(title) {
-    if(title != '') {
+    if (title != '') {
         let siteName = document.querySelector('#headerDescription')?.innerText;
         let siteLocation = document.querySelector('#headerLabel')?.innerText;
-        if(siteName == undefined) {
+        if (siteName == undefined) {
             document.querySelector('title').innerText = scrubHTML(`${title}`);
         }
         else {
@@ -31,9 +34,9 @@ async function getData() {
     let newDate = new Date();
     newDate.setMonth(newDate.getMonth() + 1);
     let expiredDate = `${newDate.getUTCMonth() + 1}/${newDate.getUTCDate()}/${newDate.getUTCFullYear()}`;
-    
-	// Create a new Query
-	let query = new LeafFormQuery();
+
+    // Create a new Query
+    let query = new LeafFormQuery();
 
     query.addTerm('categoryID', '=', 'form_aaf61');
     query.addTerm('stepID', '!=', 'resolved');
@@ -41,21 +44,21 @@ async function getData() {
     query.addTerm('deleted', '=', 0);
     query.join('status');
     query.join('stepFulfillment');
-    query.getData([38,36,32]);
+    query.getData([38, 36, 32]);
 
     query.onProgress(numProcessed => {
         document.querySelector('#grid').innerHTML = `Processing ${numProcessed}+ records`;
     });
 
-	// Execute the query
-	let result = await query.execute();
-    
+    // Execute the query
+    let result = await query.execute();
+
     // expand contents of sub-table into new rows
     let parsed = {};
     let counter = 1;
-    for(let i in result) {
-        for(let j in result[i].s1.id38_gridInput.cells) {
-            if(parsed[counter] == undefined) {
+    for (let i in result) {
+        for (let j in result[i].s1.id38_gridInput.cells) {
+            if (parsed[counter] == undefined) {
                 //parsed[counter] = result[i];
                 parsed[counter] = {};
             }
@@ -66,14 +69,14 @@ async function getData() {
             parsed[counter].title = result[i].title;
             parsed[counter].stepFulfillment = result[i].stepFulfillment;
             parsed[counter].s1 = result[i].s1;
-            
+
             parsed[counter].deviceEE = result[i].s1.id38_gridInput.cells[j][0];
             parsed[counter].serial = result[i].s1.id38_gridInput.cells[j][1];
             parsed[counter].type = result[i].s1.id38_gridInput.cells[j][2];
             parsed[counter].manufacturer = result[i].s1.id38_gridInput.cells[j][3];
             parsed[counter].model = result[i].s1.id38_gridInput.cells[j][4];
             parsed[counter].value = result[i].s1.id38_gridInput.cells[j][5];
-            
+
             counter++;
         }
     }
@@ -94,40 +97,56 @@ async function getData() {
         /*{name: 'Title', indicatorID: 'title', callback: function(data, blob) { // The Title field is a bit unique, and must be implemnted this way
             $('#'+data.cellContainerID).html(blob[data.recordID].title);
         }},*/
-		{name: 'UID', indicatorID: 'uid', callback: (data, blob) => {
-            let realRecordID = blob[data.recordID].realRecordID;
-            $('#'+data.cellContainerID).html(`<a href="index.php?a=printview&recordID=${realRecordID}">${realRecordID}</a>`);
-        }},
-        {name: 'User Email', indicatorID: 32},
-        //{name: 'Property on Temporary Loan', indicatorID: 38}, // this would normally show up as a sub-table
-        {name: 'Device EE', indicatorID: 'deviceEE', editable: false, callback: (data, blob) => {
-            $('#'+data.cellContainerID).html(blob[data.recordID].deviceEE);
-        }},
-        {name: 'Serial / IMEI', indicatorID: 'serial', editable: false, callback: (data, blob) => {
-            $('#'+data.cellContainerID).html(blob[data.recordID].serial);
-        }},
-        {name: 'Type', indicatorID: 'type', editable: false, callback: (data, blob) => {
-            $('#'+data.cellContainerID).html(blob[data.recordID].type);
-        }},
-        {name: 'Manufacturer', indicatorID: 'manufacturer', editable: false, callback: (data, blob) => {
-            $('#'+data.cellContainerID).html(blob[data.recordID].manufacturer);
-        }},
-        {name: 'Model', indicatorID: 'model', editable: false, callback: (data, blob) => {
-            $('#'+data.cellContainerID).html(blob[data.recordID].model);
-        }},
-        {name: 'Value', indicatorID: 'value', editable: false, callback: (data, blob) => {
-            $('#'+data.cellContainerID).html(blob[data.recordID].value);
-        }},
-		{name: 'Date Signed', indicatorID: 'step15', editable: false, callback: function(stepID) {
-            return function(data, blob) {
-                if(blob[data.recordID].stepFulfillment != undefined
-                   && blob[data.recordID].stepFulfillment[stepID] != undefined) {
-                    var date = new Date(blob[data.recordID].stepFulfillment[stepID].time * 1000);
-                    $('#'+data.cellContainerID).html(date.toLocaleDateString());
-                }
+        {
+            name: 'UID', indicatorID: 'uid', callback: (data, blob) => {
+                let realRecordID = blob[data.recordID].realRecordID;
+                $('#' + data.cellContainerID).html(`<a href="index.php?a=printview&recordID=${realRecordID}">${realRecordID}</a>`);
             }
-        }(15)},
-        {name: 'Expected Return Date', indicatorID: 36},
+        },
+        { name: 'User Email', indicatorID: 32 },
+        //{name: 'Property on Temporary Loan', indicatorID: 38}, // this would normally show up as a sub-table
+        {
+            name: 'Device EE', indicatorID: 'deviceEE', editable: false, callback: (data, blob) => {
+                $('#' + data.cellContainerID).html(blob[data.recordID].deviceEE);
+            }
+        },
+        {
+            name: 'Serial / IMEI', indicatorID: 'serial', editable: false, callback: (data, blob) => {
+                $('#' + data.cellContainerID).html(blob[data.recordID].serial);
+            }
+        },
+        {
+            name: 'Type', indicatorID: 'type', editable: false, callback: (data, blob) => {
+                $('#' + data.cellContainerID).html(blob[data.recordID].type);
+            }
+        },
+        {
+            name: 'Manufacturer', indicatorID: 'manufacturer', editable: false, callback: (data, blob) => {
+                $('#' + data.cellContainerID).html(blob[data.recordID].manufacturer);
+            }
+        },
+        {
+            name: 'Model', indicatorID: 'model', editable: false, callback: (data, blob) => {
+                $('#' + data.cellContainerID).html(blob[data.recordID].model);
+            }
+        },
+        {
+            name: 'Value', indicatorID: 'value', editable: false, callback: (data, blob) => {
+                $('#' + data.cellContainerID).html(blob[data.recordID].value);
+            }
+        },
+        {
+            name: 'Date Signed', indicatorID: 'step15', editable: false, callback: function (stepID) {
+                return function (data, blob) {
+                    if (blob[data.recordID].stepFulfillment != undefined
+                        && blob[data.recordID].stepFulfillment[stepID] != undefined) {
+                        var date = new Date(blob[data.recordID].stepFulfillment[stepID].time * 1000);
+                        $('#' + data.cellContainerID).html(date.toLocaleDateString());
+                    }
+                }
+            }(15)
+        },
+        { name: 'Expected Return Date', indicatorID: 36 },
     ]);
 
     // Load and populate the spreadsheet
@@ -150,5 +169,4 @@ document.addEventListener('DOMContentLoaded', main);
 <h1>Overdue Property Passes and Loaned Property</h1>
 <p>Includes passes that will expire within 1 month</p>
 <div id="grid">Loading...</div>
-
 ```

@@ -97,46 +97,31 @@ async function getData() {
         /*{name: 'Title', indicatorID: 'title', callback: function(data, blob) { // The Title field is a bit unique, and must be implemnted this way
             $('#'+data.cellContainerID).html(blob[data.recordID].title);
         }},*/
-        {
-            name: 'UID', indicatorID: 'uid', callback: (data, blob) => {
+        {name: 'UID', indicatorID: 'uid', callback: (data, blob) => {
                 let realRecordID = blob[data.recordID].realRecordID;
                 $('#' + data.cellContainerID).html(`<a href="index.php?a=printview&recordID=${realRecordID}">${realRecordID}</a>`);
-            }
-        },
-        { name: 'User Email', indicatorID: 32 },
+        }},
+        {name: 'User Email', indicatorID: 32},
         //{name: 'Property on Temporary Loan', indicatorID: 38}, // this would normally show up as a sub-table
-        {
-            name: 'Device EE', indicatorID: 'deviceEE', editable: false, callback: (data, blob) => {
+        {name: 'Device EE', indicatorID: 'deviceEE', editable: false, callback: (data, blob) => {
                 $('#' + data.cellContainerID).html(blob[data.recordID].deviceEE);
-            }
-        },
-        {
-            name: 'Serial / IMEI', indicatorID: 'serial', editable: false, callback: (data, blob) => {
+        }},
+        {name: 'Serial / IMEI', indicatorID: 'serial', editable: false, callback: (data, blob) => {
                 $('#' + data.cellContainerID).html(blob[data.recordID].serial);
-            }
-        },
-        {
-            name: 'Type', indicatorID: 'type', editable: false, callback: (data, blob) => {
+        }},
+        {name: 'Type', indicatorID: 'type', editable: false, callback: (data, blob) => {
                 $('#' + data.cellContainerID).html(blob[data.recordID].type);
-            }
-        },
-        {
-            name: 'Manufacturer', indicatorID: 'manufacturer', editable: false, callback: (data, blob) => {
+        }},
+        {name: 'Manufacturer', indicatorID: 'manufacturer', editable: false, callback: (data, blob) => {
                 $('#' + data.cellContainerID).html(blob[data.recordID].manufacturer);
-            }
-        },
-        {
-            name: 'Model', indicatorID: 'model', editable: false, callback: (data, blob) => {
+        }},
+        {name: 'Model', indicatorID: 'model', editable: false, callback: (data, blob) => {
                 $('#' + data.cellContainerID).html(blob[data.recordID].model);
-            }
-        },
-        {
-            name: 'Value', indicatorID: 'value', editable: false, callback: (data, blob) => {
+        }},
+        {name: 'Value', indicatorID: 'value', editable: false, callback: (data, blob) => {
                 $('#' + data.cellContainerID).html(blob[data.recordID].value);
-            }
-        },
-        {
-            name: 'Date Signed', indicatorID: 'step15', editable: false, callback: function (stepID) {
+        }},
+        {name: 'Date Signed', indicatorID: 'step15', editable: false, callback: function (stepID) {
                 return function (data, blob) {
                     if (blob[data.recordID].stepFulfillment != undefined
                         && blob[data.recordID].stepFulfillment[stepID] != undefined) {
@@ -146,7 +131,7 @@ async function getData() {
                 }
             }(15)
         },
-        { name: 'Expected Return Date', indicatorID: 36 },
+        {name: 'Expected Return Date', indicatorID: 36},
     ]);
 
     // Load and populate the spreadsheet

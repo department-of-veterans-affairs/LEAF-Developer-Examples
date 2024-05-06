@@ -10,11 +10,6 @@ Feel free to remove or modify any LEAF header/footer branding to maximize focus 
     margin: 1rem;
 }
 </style>
-<style>
-#content {
-    margin: 1rem;
-}
-</style>
 <h1>YOUR_APP_HEADING</h1>
 <h2>YOUR_APP_SUBHEADING</h2>
 <p>CONTENT</p>

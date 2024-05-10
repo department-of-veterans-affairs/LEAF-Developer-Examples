@@ -1,5 +1,9 @@
 # Cancelling a request
 
+Requests may only be cancelled in either of these conditions:
+- The current user is an admin
+- The current user submitted request, and has not submitted it
+
 ```js
 let recordID = YOUR_RECORD_ID_TO_CANCEL;
 let comment = 'OPTIONAL COMMENT';

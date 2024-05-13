@@ -1,4 +1,4 @@
-This is an example implementation of a custom grid input widget, using the "raw_data" input format.
+This is an example of a custom grid input widget, using the "raw_data" input format.
 
 Notes:
 - The "html" section is rendered in areas where the user is expected to input data
@@ -6,7 +6,7 @@ Notes:
 
 ### "html" section
 ```html
-<form id="cForm_736">
+<form id="cForm_{{ iID }}">
 <table class="table">
   <thead>
     <tr>
@@ -16,25 +16,25 @@ Notes:
       <td>&nbsp;</td>
     </tr>
   </thead>
-  <tbody id="tbody_736">
+  <tbody id="tbody_{{ iID }}">
   </tbody>
 </table>
 </form>
-<button id="cButton_736_add">Add Row</button>
+<button id="cButton_{{ iID }}_add">Add Row</button>
 
 <script>
 
-function cFunc_736_updateData() {
-    var data = $('#cForm_736').serializeArray();
-    $('#{{ iID }}').val(JSON.stringify(data));
+function cFunc_{{ iID }}_updateData() {
+    var data = $('#cForm_{{ iID }}').serializeArray();
+    $('#{{ iID }}').val(JSON.stringify(data)); // We're storing user data as JSON formatted text into the database
 }
 
-function cFunc_736_createRow(index) {
-      $('#tbody_736').append('<tr id="cRow_736'+ index +'">'
-                             + '<td><select name="cData_736_day'+ index +'"><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option></select></td>'
-                             + '<td><input type="text" name="cData_736_startTime'+ index +'"></input></td>'
-                             + '<td><input type="text" name="cData_736_endTime'+ index +'"></input></td>'
-                             + '<td><img onclick="$(\'#cRow_736'+ index +'\').remove(); cFunc_736_updateData();" src="../libs/dynicons/?img=process-stop.svg&w=16" title="Delete line" alt="Delete line" style="cursor: pointer" /></td>'
+function cFunc_{{ iID }}_createRow(index) {
+      $('#tbody_{{ iID }}').append('<tr id="cRow_{{ iID }}'+ index +'">'
+                             + '<td><select name="cData_{{ iID }}_day'+ index +'"><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option></select></td>'
+                             + '<td><input type="text" name="cData_{{ iID }}_startTime'+ index +'"></input></td>'
+                             + '<td><input type="text" name="cData_{{ iID }}_endTime'+ index +'"></input></td>'
+                             + '<td><img onclick="$(\'#cRow_{{ iID }}'+ index +'\').remove(); cFunc_{{ iID }}_updateData();" src="../libs/dynicons/?img=process-stop.svg&w=16" title="Delete line" alt="Delete line" style="cursor: pointer" /></td>'
                              + '</tr>');
 }
 
@@ -42,22 +42,22 @@ $(function() {
 
   var index = 0;
   var numColumns = 3;
-  $('#cButton_736_add').on('click', function() {
-      cFunc_736_createRow(index);
+  $('#cButton_{{ iID }}_add').on('click', function() {
+      cFunc_{{ iID }}_createRow(index);
        index++;
   });
 
-  $('#cForm_736').on('change', function() {
-	cFunc_736_updateData();
+  $('#cForm_{{ iID }}').on('change', function() {
+	cFunc_{{ iID }}_updateData();
   });
   
-  var data = JSON.parse($('#{{ iID }}').val());
+  var data = JSON.parse($('#{{ iID }}').val()); // Read stored JSON formatted text from the database
 
   for(var i = 0; i < data.length; i += numColumns) {
-    cFunc_736_createRow(index);
-    $('select[name=cData_736_day' + index + ']').val(data[i].value);
-    $('input[name=cData_736_startTime' + index + ']').val(data[i + 1].value);
-    $('input[name=cData_736_endTime' + index + ']').val(data[i + 2].value);
+    cFunc_{{ iID }}_createRow(index);
+    $('select[name=cData_{{ iID }}_day' + index + ']').val(data[i].value);
+    $('input[name=cData_{{ iID }}_startTime' + index + ']').val(data[i + 1].value);
+    $('input[name=cData_{{ iID }}_endTime' + index + ']').val(data[i + 2].value);
     index++;
   }
 

@@ -1,6 +1,6 @@
 # Custom Searchbar on the homepage
 
-![image](https://github.com/department-of-veterans-affairs/LEAF-Developer-Examples/assets/16783916/ebd03b65-2196-432e-bef6-98722a4fbac4)
+![image](https://github.com/department-of-veterans-affairs/LEAF-Developer-Examples/assets/16783916/c47b95f6-012f-4055-961e-0d04d40d5a6b)
 
 The searchbar on the homepage can be customized. Let's assume we have a datafield that contains ticket numbers formatted as RITM#####. We can enable searches based on that format by adding a logic gate.
 

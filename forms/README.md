@@ -6,7 +6,7 @@ All actions involving a write operation require a secret token to prevent Cross 
 <!--{$CSRFToken}-->
 ```
 
-To retrieve a large quantity of records, please use the Report Builder to generate an endpoint. You may optionally use [formQuery.js](https://github.com/department-of-veterans-affairs/LEAF/blob/master/LEAF_Request_Portal/js/formQuery.js) to generate your query programmatically.
+To retrieve a large quantity of records, please use the Report Builder to generate a query and endpoint. For very large queries, we recommend using [formQuery.js](https://github.com/department-of-veterans-affairs/LEAF/blob/master/LEAF_Request_Portal/js/formQuery.js), which includes features that improve user-experience such as lazy-loading.
 
 ## Conventions and terminology
 - Retrieving data is a "GET" request

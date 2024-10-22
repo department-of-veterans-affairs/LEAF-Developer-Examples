@@ -6,6 +6,8 @@ All actions involving a write operation require a secret token to prevent Cross 
 <!--{$CSRFToken}-->
 ```
 
+To retrieve a large quantity of records, please use the Report Builder to generate an endpoint. You may optionally use [formQuery.js](https://github.com/department-of-veterans-affairs/LEAF/blob/master/LEAF_Request_Portal/js/formQuery.js) to generate your query programmatically.
+
 ## Conventions and terminology
 - Retrieving data is a "GET" request
 - Writing data is a "POST" request
@@ -19,6 +21,7 @@ The following is a list of commonly used APIs, their parameters, and examples of
 
 
 ### Records ([api/form](https://github.com/department-of-veterans-affairs/LEAF/blob/master/LEAF_Request_Portal/api/controllers/FormController.php))
+
 #### Create a new record - [Example](https://github.com/department-of-veterans-affairs/LEAF-Developer-Examples/blob/master/forms/create_new_request.tpl)
 POST api/form/new
   ```
@@ -46,4 +49,15 @@ POST api/form/[recordID]/cancel - [Example](https://github.com/department-of-vet
   ```
   CSRFToken      string (required)
   comment        string (optional)
+  ```
+
+### Workflow for a record
+
+#### Take an action on a record ([api/formWorkflow](https://github.com/department-of-veterans-affairs/LEAF/blob/master/LEAF_Request_Portal/api/controllers/FormWorkflowController.php))
+POST api/formWorkflow/[recordID]/apply
+  ```
+  CSRFToken      string (required)
+  dependencyID   int    (required) This is the ID of the requirement for the step that the record is currently on
+  actionType     string (required) This is the ID of the action that will be applied
+  comment        string (optional) For automated actions, it's good practice to briefly explain the purpose of the automation
   ```

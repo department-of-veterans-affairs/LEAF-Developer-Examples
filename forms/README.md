@@ -51,9 +51,9 @@ POST api/form/[recordID]/cancel - [Example](https://github.com/department-of-vet
   comment        string (optional)
   ```
 
-### Workflow for a record
+### Workflow for a record ([api/formWorkflow](https://github.com/department-of-veterans-affairs/LEAF/blob/master/LEAF_Request_Portal/api/controllers/FormWorkflowController.php))
 
-#### Take an action on a record ([api/formWorkflow](https://github.com/department-of-veterans-affairs/LEAF/blob/master/LEAF_Request_Portal/api/controllers/FormWorkflowController.php))
+#### Take an action on a record
 POST api/formWorkflow/[recordID]/apply
   ```
   CSRFToken      string (required)

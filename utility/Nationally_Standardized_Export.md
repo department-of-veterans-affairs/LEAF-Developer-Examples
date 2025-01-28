@@ -13,6 +13,7 @@ Data is retrieved from all subordinate sites and combined into a single file. It
 ```html
 <!--{if $empMembership['groupID'][1]}-->
 <script src="../libs/js/LEAF/intervalQueue.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" integrity="sha512-XMVd28F1oH/O71fzwBnV7HucLxVwtxf26XV8P4wPk26EDxuGZ91N8bsOttmnomcCD3CS5ZMRL50H0GgOHvegtg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <style>
 li {
     padding: 8px;
@@ -105,67 +106,49 @@ async function buildExport(sites, formID, formName) {
     
     let formFields = await getFormFields(formID);
     let parsedData = [];
-    let batchSize = 1000;
 
     let queue = new intervalQueue();
     queue.setConcurrency(3);
     queue.setWorker(function(site) {
-        
-        function querySite(site, offset) {
-            if(offset == undefined) {
-                offset = 0;
-            }
-            else {
-                offset += batchSize;
-            }
-            
-            let query = new LeafFormQuery();
-            query.setRootURL(site);
-            query.setLimit(offset, batchSize);
-            query.addTerm('categoryID', '=', formID);
-            query.addTerm('deleted', '=', 0);
-            query.addTerm('submitted', '>', 0);
-            query.join('status');
-            query.setExtraParams('&x-filterData=submitted,stepTitle,userID,lastStatus');
+        let query = new LeafFormQuery();
+        query.setRootURL(site);
+        query.addTerm('categoryID', '=', formID);
+        query.addTerm('deleted', '=', 0);
+        query.addTerm('submitted', '>', 0);
+        query.join('status');
+        query.join('stepFulfillment');
+        query.setExtraParams('&x-filterData=submitted,stepTitle,userID,lastStatus,date,stepFulfillment');
 
-            Object.keys(formFields).forEach(indicatorID => {
-                query.getData(indicatorID);
-            });
-            
-            return query.execute().then(function(res) {
-                $('#loadingStatus').html(`Retrieving data from ${queue.getLoaded()} of ${sites.length} sites`);
+        Object.keys(formFields).forEach(indicatorID => {
+            query.getData(indicatorID);
+        });
 
-                for(let i in res) {
-                    let tmp = {};
-                    tmp.site = site;
-                    tmp.recordID = i;
-                    tmp.status = res[i].stepTitle == null ? res[i].lastStatus : 'Pending ' + res[i].stepTitle;
-                    tmp.userID = res[i].userID;
+        return query.execute().then(function(res) {
+            $('#loadingStatus').html(`Retrieving data from ${queue.getLoaded()} of ${sites.length} sites`);
 
-                    for(let j in formFields) {
-                        tmp[formFields[j].name] = res[i].s1['id'+j]; // TODO: Detect duplicate labels
+            for(let i in res) {
+                let tmp = {};
+                tmp.site = site;
+                tmp.recordID = i;
+                tmp.status = res[i].stepTitle == null ? res[i].lastStatus : 'Pending ' + res[i].stepTitle;
+                tmp.userID = res[i].userID;
+                tmp.dateInitiated = res[i].date + '';
+                tmp.dateApprovedByCOS = res[i]?.stepFulfillment?.[15]?.time == undefined ? '' : res[i]?.stepFulfillment?.[15]?.time + '';
 
-                        if(formFields[j].format == 'orgchart_employee') {
-                            if(res[i].s1['id'+j+'_orgchart'] != undefined) {
-                                tmp[formFields[j].name] = res[i].s1['id'+j+'_orgchart'].lastName + ', ' + res[i].s1['id'+j+'_orgchart'].firstName;
-                                tmp[formFields[j].name + " (Email)"] = res[i].s1['id'+j+'_orgchart'].email;
-                            }
+                for(let j in formFields) {
+                    tmp[formFields[j].name] = res[i].s1['id'+j]; // TODO: Detect duplicate labels
+
+                    if(formFields[j].format == 'orgchart_employee') {
+                        if(res[i].s1['id'+j+'_orgchart'] != undefined) {
+                            tmp[formFields[j].name] = res[i].s1['id'+j+'_orgchart'].lastName + ', ' + res[i].s1['id'+j+'_orgchart'].firstName;
+                            tmp[formFields[j].name + " (Email)"] = res[i].s1['id'+j+'_orgchart'].email;
                         }
                     }
-
-                    parsedData.push(tmp);
                 }
-                
-                if(Object.keys(res).length == batchSize) {
-                    return querySite(site, offset);
-                }
-            })
-            .fail((xhr, textStatus, error) => {
-            	alert(xhr.responseText);
-            });
-        }
 
-        return querySite(site);
+                parsedData.push(tmp);
+            }
+        });
     });
 
     sites.forEach(site => {
@@ -179,6 +162,7 @@ async function buildExport(sites, formID, formName) {
 
     let exportableData = JSON.stringify(parsedData);
 
+    // Export JSON format
     let uploadData = new FormData();
     let blob = new Blob([ exportableData ], {type: 'application/json'});
     uploadData.append('CSRFToken', '<!--{$CSRFToken}-->');
@@ -197,6 +181,37 @@ async function buildExport(sites, formID, formName) {
             console.log(e);
         }
     }
+
+    // compress JSON into ZIP file
+    const zip = new JSZip();
+    zip.file(`${formName} (${formID}).json`, exportableData);
+
+    zip.generateAsync({
+        type:"blob",
+        compression: "DEFLATE",
+        compressionOptions: {
+            level: 9
+        }
+    }).then(async function(content) {
+        let uploadData = new FormData();
+        let blob = new Blob([ content ], {type: 'application/zip'});
+        uploadData.append('CSRFToken', '<!--{$CSRFToken}-->');
+        uploadData.append(indicatorID, blob, `${formName} (${formID}).zip`);
+
+        try {
+            await $.ajax({
+                type: 'POST',
+                url: `./ajaxIndex.php?a=doupload&recordID=${recordID}`,
+                data: uploadData,
+                processData: false,
+                contentType: false
+            });
+        } catch(e) {
+            if(e.status != 200) {
+                console.log(e);
+            }
+        }
+    });
 
     $('#loadingStatus').html(`Building CSV report...`);
     // format as CSV
@@ -262,6 +277,7 @@ async function main() {
     if(sites.length == 0) {
         return;
     }
+
     let tmpSites = [...sites];
 
     let openForm = window.location.hash.substring(1);

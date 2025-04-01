@@ -19,3 +19,7 @@ $(async function() {
   
 </script>
 ```
+## Notes
+The `6` in `...data[6].data` refers to the ID number of the email attribute.
+
+Other attributes may be referenced by using the relevant ID. The full list of IDs are located here: https://github.com/department-of-veterans-affairs/LEAF/blob/master/docker/mysql/db/boilerplate/orgchart_boilerplate_empty.sql#L210-L238

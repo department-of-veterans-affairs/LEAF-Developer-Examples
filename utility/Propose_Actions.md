@@ -90,11 +90,15 @@ async function setupProposals(stepID) {
     function initColRemovalListeners() {
         let btns_removeColumn = document.querySelectorAll('#' + grid.getPrefixID() + 'thead_tr>th>img');
         btns_removeColumn = Array.from(btns_removeColumn);
+        headers = grid.headers();
         for(let i in btns_removeColumn) {
             btns_removeColumn[i].addEventListener('click', () => {
                 let removeID = btns_removeColumn[i].dataset.id;
                 customColumns.splice(customColumns.indexOf(removeID), 1);
-                let newHeaders = headers.filter(header => header.indicatorID != removeID);
+                let newHeaders = headers.filter(header => {
+                    return header.indicatorID != removeID;
+                });
+   
                 grid.setHeaders(newHeaders);
                 grid.renderBody();
                 initColRemovalListeners();

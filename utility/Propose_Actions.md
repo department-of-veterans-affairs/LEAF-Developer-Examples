@@ -1,5 +1,7 @@
 # Proposed Actions Page Creator
 
+TODO: Cleanup code
+
 ```html
 <script src="../libs/js/LEAF/intervalQueue.js"></script>
 <style>
@@ -16,6 +18,14 @@ p, .card {
 table.leaf_grid > tbody > tr > td, table select {
     font-size: 14pt;
     padding: 1rem;
+    line-height: 1.7rem;
+}
+.file {
+    background-color: #e0e0e0;
+    border-radius: 10px;
+    padding: 4px;
+    margin: 4px;
+    font-size: 12pt;
 }
 </style>
 <script>
@@ -87,6 +97,7 @@ async function setupProposals(stepID) {
                 let newHeaders = headers.filter(header => header.indicatorID != removeID);
                 grid.setHeaders(newHeaders);
                 grid.renderBody();
+                initColRemovalListeners();
                 updateUrlColumnState(customColumns);
             });
         }
@@ -150,22 +161,38 @@ async function setupProposals(stepID) {
     let fieldData = await fetch(`./api/form/_${catID}/flat`).then(res => res.json());
     
     let headers = [
+        {name: '#', indicatorID: 'uid', editable: false, callback: function(data, blob) {
+            document.querySelector(`#${data.cellContainerID}`).innerHTML = `<span style="background-color: black; color: white; padding: 4px; margin: 4px">${data.recordID}</span>`;
+        }},
 		{name: 'Type', indicatorID: 'type', editable: false, callback: function(data, blob) {
             let primaryCategory = getPrimaryCategory(activeCategories, blob[data.recordID].categoryIDs);
             document.querySelector(`#${data.cellContainerID}`).innerHTML = primaryCategory.categoryName;
         }},
         {name: 'Title', indicatorID: 'title', editable: false, callback: function(data, blob) {
-            document.querySelector(`#${data.cellContainerID}`).innerHTML = blob[data.recordID].title;
+            document.querySelector(`#${data.cellContainerID}`).innerHTML = `<a href="index.php?a=printview&recordID=${data.recordID}" target="_blank">${blob[data.recordID].title}</a>`;
         }},
-        {name: 'Propose Action', indicatorID: 'decision', editable: false, callback: function(data, blob) {
+        {name: 'Propose Action', indicatorID: 'decision', editable: false, sortable: false, callback: function(data, blob) {
+            document.querySelector(`#${data.cellContainerID}`).style.backgroundColor = '#fee685';
             let options = `<select class="recordDecision" data-record-id="${data.recordID}">
     				${htmlActions}
     			</select>`;
+            document.querySelector(`#${data.cellContainerID}`).innerHTML = options;
+            document.querySelector(`#${data.cellContainerID}>select`).addEventListener('change', (evt) => {
+                if(evt.target.value != '') {
+                    document.querySelector(`#${grid.getPrefixID()}${data.recordID}_comments>textarea`).style.display = 'inline';
+                } else {
+                    document.querySelector(`#${grid.getPrefixID()}${data.recordID}_comments>textarea`).style.display = 'none';
+                }
+            });
+        }},
+        {name: 'Comments', indicatorID: 'comments', editable: false, sortable: false, callback: function(data, blob) {
+            let options = `<textarea style="display: none" class="recordComment" data-record-id="${data.recordID}"></textarea>`;
             document.querySelector(`#${data.cellContainerID}`).innerHTML = options;
         }}
     ];
 
     let grid = new LeafFormGrid('proposalGrid');
+    grid.hideIndex();
     grid.setDataBlob(data);
     grid.setHeaders(headers);
 
@@ -181,13 +208,27 @@ async function setupProposals(stepID) {
             query.getData(colID);
             customColumns.push(colID);
             let fieldName = fieldData[colID][1].description == '' ? fieldData[colID][1].name : fieldData[colID][1].description;
+            let format = fieldData[colID][1].format;
             fieldName = scrubHTML(fieldName);
             let newHeader = {name: fieldName + ` <img src="dynicons/?img=process-stop.svg&w=16" style="cursor: pointer" data-id="${colID}">`, indicatorID: colID, sortable: false, editable: false, callback: function(data, blob) {
+                if(format == 'fileupload' && blob[data.recordID].s1[`id${colID}`] != null) {
+                    let files = blob[data.recordID].s1[`id${colID}`].split("\n");
+                    let output = '';
+                    let i = 0;
+                    files.forEach(file => {
+                        if(file.length > 20) {
+                            file = file.substring(0, 17) + '...' + file.substring(file.length-10, file.length);
+                        }
+                        output += `<div class="file"><img src="dynicons/?img=mail-attachment.svg&w=24" alt=""><a href="file.php?form=${data.recordID}&id=${colID}&series=1&file=${i}" target="_blank">${file}</a></div>`;
+                        i++;
+                    });
+                    document.querySelector(`#${data.cellContainerID}`).innerHTML = output;
+                } else{
                     document.querySelector(`#${data.cellContainerID}`).innerHTML = blob[data.recordID].s1[`id${colID}`];
                 }
-            };
+            }};
             headers = grid.headers();
-            headers.splice(headers.length - 1, 0, newHeader);
+            headers.splice(headers.length - 2, 0, newHeader);
             grid.setHeaders(headers);
         });
 
@@ -208,7 +249,8 @@ async function setupProposals(stepID) {
             fields.push(fieldData[i][1]);
         }
     }
-    fields.sort((a, b) => a.name > b.name);
+    let collator = new Intl.Collator('en', {numeric: true, sensitivity: 'base'});
+    fields.sort((a, b) => collator.compare(a.name, b.name));
 
     let columnsHTML = '';
     fields.forEach(field => {
@@ -234,7 +276,7 @@ async function setupProposals(stepID) {
             }
         };
         headers = grid.headers();
-        headers.splice(headers.length - 1, 0, newHeader);
+        headers.splice(headers.length - 2, 0, newHeader);
         grid.setHeaders(headers);
 
         var query = new LeafFormQuery();
@@ -260,17 +302,24 @@ async function setupProposals(stepID) {
 function prepareProposal(actions, dependencyID, fieldData) {
     let numDecisions = 0;
     let decisions = {};
+    let comments = {};
     document.querySelectorAll('.recordDecision').forEach(decision => {
         let recordID = decision.getAttribute('data-record-id');
-        let selectedAction = decision.value;
-        if(selectedAction != '') {
-            decisions[recordID] = selectedAction;
+        if(decision.value != '') {
+            decisions[recordID] = decision.value;
             numDecisions++;
+        }
+    });
+    document.querySelectorAll('.recordComment').forEach(comment => {
+        let recordID = comment.getAttribute('data-record-id');
+        if(comment.value != '') {
+            comments[recordID] = comment.value;
         }
     });
 
     if(numDecisions == 0) {
         alert("No proposed actions have been prepared.");
+        return;
     }
 
     const url = new URL(location);
@@ -295,6 +344,7 @@ function prepareProposal(actions, dependencyID, fieldData) {
     proposal.actions = cleanActions;
     let indicatorIDs = url.searchParams.get('indicatorIDs');
     proposal.decisions = decisions;
+    proposal.comments = comments;
     proposal.indicatorIDs = [];
     if(indicatorIDs != null) {
         indicatorIDs = indicatorIDs.split('-');
@@ -303,7 +353,8 @@ function prepareProposal(actions, dependencyID, fieldData) {
             fieldName = scrubHTML(fieldName);
             proposal.indicatorIDs.push({
                 indicatorID: id,
-                name: fieldName
+                name: fieldName,
+                format: fieldData[id][1].format
             });
         });
     }
@@ -322,7 +373,6 @@ async function showProposal(encodedProposal) {
 
     let proposal = LZString.decompressFromBase64(encodedProposal);
     proposal = JSON.parse(proposal);
-    console.log(proposal);
     
     document.querySelector('#reviewTitle').innerText = proposal.title;
     document.querySelector('#reviewDescription').innerText = proposal.description;
@@ -383,15 +433,34 @@ async function showProposal(encodedProposal) {
             document.querySelector(`#${data.cellContainerID}`).style.backgroundColor = '#fee685';
             
             document.querySelector(`#${data.cellContainerID}`).innerHTML = proposedAction;
-        }}
+        }},
+        {name: 'Comments', indicatorID: 'comments', editable: false, callback: function(data, blob) {
+            document.querySelector(`#${data.cellContainerID}`).style.backgroundColor = '#e0e0e0';
+            let comment = `<textarea class="recordComment" data-record-id="${data.recordID}">${scrubHTML(proposal.comments[data.recordID])}</textarea>`;
+            document.querySelector(`#${data.cellContainerID}`).innerHTML = comment;
+        }},
     ];
 
     proposal.indicatorIDs.forEach(indicator => {
         let newHeader = {name: indicator.name, indicatorID: indicator.indicatorID, editable: false, callback: function(data, blob) {
-                document.querySelector(`#${data.cellContainerID}`).innerHTML = blob[data.recordID].s1[`id${indicator.indicatorID}`];
+                if(indicator.format == 'fileupload' && blob[data.recordID].s1[`id${indicator.indicatorID}`] != null) {
+                    let files = blob[data.recordID].s1[`id${indicator.indicatorID}`].split("\n");
+                    let output = '';
+                    let i = 0;
+                    files.forEach(file => {
+                        if(file.length > 20) {
+                            file = file.substring(0, 17) + '...' + file.substring(file.length-10, file.length);
+                        }
+                        output += `<div class="file"><img src="dynicons/?img=mail-attachment.svg&w=24" alt=""><a href="file.php?form=${data.recordID}&id=${indicator.indicatorID}&series=1&file=${i}" target="_blank">${file}</a></div>`;
+                        i++;
+                    });
+                    document.querySelector(`#${data.cellContainerID}`).innerHTML = output;
+                } else {
+                    document.querySelector(`#${data.cellContainerID}`).innerHTML = blob[data.recordID].s1[`id${indicator.indicatorID}`];
+                }
             }
         };
-        headers.splice(headers.length - 1, 0, newHeader);
+        headers.splice(headers.length - 2, 0, newHeader);
     });
 
     grid.setHeaders(headers);
@@ -404,15 +473,27 @@ async function showProposal(encodedProposal) {
         confirm_dialog.setSaveHandler(async function() {
             confirm_dialog.setContent('Applying actions...<br /><div id="confirmProgress"></div>');
             confirm_dialog.hideButtons();
-            
+
+            let comments = {};
+            document.querySelectorAll('.recordComment').forEach(comment => {
+                let recordID = comment.getAttribute('data-record-id');
+                if(comment.value != '') {
+                    comments[recordID] = comment.value;
+                }
+            });
+
             let queue = new intervalQueue();
             queue.setQueue(Object.keys(proposal.decisions));
             queue.setWorker(item => {
+                let comment = '(Decision as per proposal)';
+                if(comments[item] != undefined && comments[item] != '') {
+                    comment = comments[item].trim() + "\n" + comment;
+                }
                 document.querySelector('#confirmProgress').innerHTML = `Confirmed ${queue.getLoaded()}/${Object.keys(proposal.decisions).length}`;
                 let formData = new FormData();
                 formData.append('actionType', proposal.decisions[item]);
                 formData.append('dependencyID', proposal.dependencyID);
-                formData.append('comment', 'Decision as per proposal');
+                formData.append('comment', comment);
                 formData.append('CSRFToken', '<!--{$CSRFToken}-->');
                 return fetch(`./api/formWorkflow/${item}/apply`, {
                     method: 'POST',
@@ -483,7 +564,7 @@ document.addEventListener('DOMContentLoaded', main);
     <h1 id="reviewTitle" style="text-align: center">Loading...</h1>
     <p id="reviewDescription" style="margin: auto; width: 40vw; margin-bottom: 2rem">...</p>
     <div style="display: flex; justify-content: center; align-items: center">
-        <div id="grid" style="margin-bottom: 3rem; margin: auto">Loading...</div>
+        <div id="grid" style="margin-bottom: 3rem; margin: auto; min-width: 0">Loading...</div>
     </div>
     <div id="proposalStatus" style="text-align: center; margin-top: 2rem">
         <button id="btn_approveProposal" class="buttonNorm" style="font-size: 14pt"><img src="dynicons/?img=gnome-emblem-default.svg&w=32" alt=""> Approve this Proposal</button>
@@ -500,5 +581,5 @@ document.addEventListener('DOMContentLoaded', main);
         </div>
     </form>
 </div>
-    
+
 ```

@@ -33,7 +33,13 @@ function scrubHTML(input) {
 async function showSetup() {
     document.querySelector('#setup').style.display = 'block';
 
-    let forms = await fetch('api/workflow/steps').then(res => res.json());
+    let formsObj = await fetch('api/workflow/steps').then(res => res.json());
+    let forms = [];
+    for(let i in formsObj) {
+        forms.push(formsObj[i]);
+    }
+    let collator = new Intl.Collator('en', {numeric: true, sensitivity: 'base'});
+    forms.sort((a, b) => collator.compare(a.stepTitle, b.stepTitle));
     let buf = '';
     for(let i in forms) {
         buf += `<option value="${forms[i].stepID}">${scrubHTML(forms[i].stepTitle)}</option>`;
@@ -133,6 +139,11 @@ async function setupProposals(stepID) {
     query.addTerm('stepID', '=', stepID);
     query.join('categoryName');
     let data = await query.execute();
+    
+    if(Object.keys(data).length == 0) {
+        alert('No records available for this step.');
+        return;
+    }
 
     // prep data for column customization
     let catID = getPrimaryCategory(activeCategories, data[Object.keys(data)[0]].categoryIDs).categoryID;
@@ -436,8 +447,8 @@ async function main() {
 document.addEventListener('DOMContentLoaded', main);
 </script>
 <div id="setup" style="display: none">
-    <h1>Setup Committee View</h1>
-    <p>The Committee View provides a more focused interface to enable an approver to easily review and concur on proposed actions.</p>
+    <h1>Setup Proposal</h1>
+    <p>This will create a custom page to help an approving official easily review and concur on proposed actions.</p>
 
     <br /><br />
     <div class="card">

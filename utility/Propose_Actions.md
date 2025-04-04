@@ -270,11 +270,25 @@ async function setupProposals(stepID) {
         }
         customColumns.push(colID);
         let fieldName = fieldData[colID][1].description == '' ? fieldData[colID][1].name : fieldData[colID][1].description;
+        let indicator = fieldData[colID][1];
         fieldName = scrubHTML(fieldName);
         let newHeader = {name: fieldName + ` <img src="dynicons/?img=process-stop.svg&w=16" style="cursor: pointer" data-id="${colID}">`, indicatorID: colID, sortable: false, editable: false, callback: function(data, blob) {
+            if(indicator.format == 'fileupload' && blob[data.recordID].s1[`id${colID}`] != null) {
+                let files = blob[data.recordID].s1[`id${colID}`].split("\n");
+                let output = '';
+                let i = 0;
+                files.forEach(file => {
+                    if(file.length > 20) {
+                        file = file.substring(0, 17) + '...' + file.substring(file.length-10, file.length);
+                    }
+                    output += `<div class="file"><img src="dynicons/?img=mail-attachment.svg&w=24" alt=""><a href="file.php?form=${data.recordID}&id=${colID}&series=1&file=${i}" target="_blank">${file}</a></div>`;
+                    i++;
+                });
+                document.querySelector(`#${data.cellContainerID}`).innerHTML = output;
+            } else {
                 document.querySelector(`#${data.cellContainerID}`).innerHTML = blob[data.recordID].s1[`id${colID}`];
             }
-        };
+        }};
         headers = grid.headers();
         headers.splice(headers.length - 2, 0, newHeader);
         grid.setHeaders(headers);
@@ -482,6 +496,13 @@ async function showProposal(encodedProposal) {
                 }
             });
 
+            // clear out old decisions on repeat runs
+            for(let i in proposal.decisions) {
+                if(data[i] == undefined) {
+                    delete proposal.decisions[i];
+                }
+            }
+
             let queue = new intervalQueue();
             queue.setQueue(Object.keys(proposal.decisions));
             queue.setWorker(item => {
@@ -528,8 +549,8 @@ async function main() {
 document.addEventListener('DOMContentLoaded', main);
 </script>
 <div id="setup" style="display: none">
-    <h1>Setup Proposal</h1>
-    <p>This will create a custom page to help an approving official easily review and concur on proposed actions.</p>
+    <h1>Create Proposal</h1>
+    <p>This will create a custom page to help an approving official review and execute proposed actions.</p>
 
     <br /><br />
     <div class="card">
@@ -541,8 +562,8 @@ document.addEventListener('DOMContentLoaded', main);
     </div>
 </div>
 <div id="setupProposals" style="display: none" class="card">
-    <h1>Setup Proposal</h1>
-    <p>Proposed actions will be presented for final review. Records without a proposed action will not be listed during final review.</p>
+    <h1>Create Proposal</h1>
+    <p>Records without a proposed action will not be listed during final review.</p>
     <ul>
         <li id="selectDependency" style="display: none"></li>
         <li>Title of proposal: <input type="text" id="proposalTitle" /></li>

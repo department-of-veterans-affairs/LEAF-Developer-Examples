@@ -2,7 +2,14 @@
 
 This generates a Proposal page to help streamline the process of reviewing many requests.
 
-After generating the Proposal, an approving official can access it to view specific records, relevant data (via data columns), and apply actions in bulk.
+An individual can prepare a proposal:
+
+![Screenshot of configuration](https://github.com/user-attachments/assets/30ac6e3b-98e0-4476-9c91-575273476ff3)
+
+After generating the Proposal, an approving official can access it to view specific records, relevant data (via data columns), and apply actions in bulk:
+
+![Screenshot of Proposal](https://github.com/user-attachments/assets/bbd10595-d6b6-4a29-a0d5-0a8afc680a5a)
+
 
 ## Prerequisite:
 1. This file must be loaded in the Report Programmer area

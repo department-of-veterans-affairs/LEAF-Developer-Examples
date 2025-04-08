@@ -1,6 +1,11 @@
 # Proposed Actions Page Creator
 
-TODO: Cleanup code
+This generates a Proposal page to help streamline the process of reviewing many requests.
+
+After generating the Proposal, an approving official can access it to view specific records, relevant data (via data columns), and apply actions in bulk.
+
+## Prerequisite:
+1. This file must be loaded in the Report Programmer area
 
 ```html
 <script src="../libs/js/LEAF/intervalQueue.js"></script>

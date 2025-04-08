@@ -2,7 +2,10 @@
 
 This generates a Quick Review page to help streamline the process of reviewing many requests.
 
-After generating the Review link, an approving official can access it to view pending requests, relevant data (via data columns), and apply actions in bulk.
+After generating the Review link, an approving official can access it to view pending requests, relevant data (via data columns), and apply actions in bulk:
+
+![image](https://github.com/user-attachments/assets/4affa8d6-753a-435f-8038-8c8601fa3472)
+
 
 
 ## Prerequisite:

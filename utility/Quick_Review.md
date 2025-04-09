@@ -207,12 +207,23 @@ async function setupProposals(stepID) {
     let dependencyID = null;
     if(dependencies.length > 1) {
         document.querySelector('#selectDependency').style.display = 'inline';
-        document.querySelector('#selectDependency').innerHTML = 'Select a role: <select id="dependencySelect"><option value="">Select...</option></select>';
+        document.querySelector('#selectDependency').innerHTML = 'Select a role <span style="color: red">*required</span>: <select id="dependencySelect"><option value="">Select...</option></select>';
         dependencies.forEach(dep => {
             document.querySelector('#dependencySelect').innerHTML += `<option value="${dep.dependencyID}">${dep.description}</option>`;
         });
         document.querySelector('#dependencySelect').addEventListener('change', () => {
             dependencyID = document.querySelector('#dependencySelect').value;
+
+            // If the step includes multiple requirements, filter out dependencyIDs that don't match
+            let filteredData = {};
+            for(let i in data) {
+                if(data[i].unfilledDependencyData[dependencyID] != undefined) {
+                    filteredData[i] = data[i];
+                }
+            }
+            grid.setDataBlob(filteredData);
+            grid.renderBody();
+            initColRemovalListeners();
         });
     } else {
         dependencyID = dependencies[0].dependencyID;
@@ -231,6 +242,7 @@ async function setupProposals(stepID) {
     let query = new LeafFormQuery();
     query.addTerm('stepID', '=', stepID);
     query.join('categoryName');
+    query.join('unfilledDependencies');
     query.join('service');
     let data = await query.execute();
     
@@ -283,6 +295,7 @@ async function setupProposals(stepID) {
         let query = new LeafFormQuery();
         query.addTerm('stepID', '=', stepID);
         query.join('categoryName');
+        query.join('unfilledDependencies');
         query.join('service');
 
         let indicatorList = indicatorIDs.split('-');
@@ -299,7 +312,7 @@ async function setupProposals(stepID) {
             grid.setHeaders(headers);
         });
 
-        let data = await query.execute();
+        data = await query.execute();
         grid.setDataBlob(data);
         grid.renderBody();
         initColRemovalListeners();
@@ -347,6 +360,7 @@ async function setupProposals(stepID) {
         var query = new LeafFormQuery();
         query.addTerm('stepID', '=', stepID);
         query.join('categoryName');
+        query.join('unfilledDependencies');
         query.join('service');
         customColumns.forEach(col => {
             if(Number.isFinite(+col)) {
@@ -355,7 +369,19 @@ async function setupProposals(stepID) {
         });
         let data = await query.execute();
 
-        grid.setDataBlob(data);
+        if(dependencyID != null) {
+            // If the step includes multiple requirements, filter out dependencyIDs that don't match
+            let filteredData = {};
+            for(let i in data) {
+                if(data[i].unfilledDependencyData[dependencyID] != undefined) {
+                    filteredData[i] = data[i];
+                }
+            }
+            grid.setDataBlob(filteredData);
+        } else {
+            grid.setDataBlob(data);
+        }
+
         grid.renderBody();
         updateUrlColumnState(customColumns);
 
@@ -468,6 +494,7 @@ async function showProposal(encodedProposal) {
     let query = new LeafFormQuery();
     query.addTerm('stepID', '=', proposal.stepID);
     query.join('categoryName');
+    query.join('unfilledDependencies');
     query.join('service');
     proposal.indicatorIDs.forEach(indicator => {
         if(Number.isFinite(+indicator.indicatorID)) {
@@ -475,6 +502,13 @@ async function showProposal(encodedProposal) {
         }
     });
     let data = await query.execute();
+
+    // If the step includes multiple requirements, filter out dependencyIDs that don't match
+    for(let i in data) {
+        if(data[i].unfilledDependencyData[proposal.dependencyID] == undefined) {
+            delete data[i];
+        }
+    }
 
     if(Object.keys(data).length == 0) {
         document.querySelector('#grid').style.display = 'none';

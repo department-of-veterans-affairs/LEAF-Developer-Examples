@@ -14,6 +14,8 @@ This example replaces the current record's title with form data.
 async function main{{ iID }}() {
     let dataFieldIDs = [1, 2, 3];
 
+    let data = {}; // This is populated automatically
+
     function getCustomTitle() {
         return `My Custom Title ${data[1]} ${data[2]} ${data[3]}`;
     }
@@ -40,7 +42,6 @@ async function main{{ iID }}() {
         }
     });
 
-    let data = {};
     if(sameSection) {
         // Retrieve data within the same section
         dataFieldIDs.forEach(id => {

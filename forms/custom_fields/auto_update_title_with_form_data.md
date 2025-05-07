@@ -8,6 +8,8 @@ This example replaces the current record's title with form data.
 3. Open the field's "Programmer" mode, and place the following code in the `html` section.
 4. Modify the code (dataFieldIDs and getCustomTitle) to match your data field IDs and desired format.
 
+Note: If the data fields are all in the same section, place the code in the same section. If the fields are in different sections, place the code in a section that comes after all data fields.
+
 ```html
 <script src="js/formQuery.js"></script>
 <script>

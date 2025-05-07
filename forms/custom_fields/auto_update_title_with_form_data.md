@@ -11,11 +11,21 @@ This example replaces the current record's title with form data.
 ```html
 <script src="js/formQuery.js"></script>
 <script>
-async function main{{ iID }}() 
-    let dataFieldIDs = [1, 2, 3];
+async function main{{ iID }}() {
+    let dataFieldIDs = [1];
 
     function getCustomTitle() {
         return `My Custom Title ${data[1]} ${data[2]} ${data[3]}`;
+    }
+
+    function saveTitle() {
+        let postData = new FormData();
+        postData.append('CSRFToken', CSRFToken);
+        postData.append('title', getCustomTitle());
+        fetch(`api/form/${recordID}/title`, {
+            method: 'POST',
+            body: postData
+        });
     }
 
     // Hide this field's label
@@ -34,8 +44,15 @@ async function main{{ iID }}()
     if(sameSection) {
         // Retrieve data within the same section
         dataFieldIDs.forEach(id => {
-            data[id] = document.getElementById(id).value;
+            document.getElementById(id).addEventListener('change', () => {
+            	dataFieldIDs.forEach(id => {
+                    data[id] = document.getElementById(id).value;
+                });
+                saveTitle();
+            });
         });
+
+        
     } else {
         // Retrieve data from other sections
         let recordID = {{ recordID }};
@@ -45,23 +62,16 @@ async function main{{ iID }}()
         query.setExtraParams('&x-filterData=');
         let res = await query.execute();
         dataFieldIDs.forEach(id => {
-            let value = res[{{ recordID}}].s1[`id${id}`];
+            let value = res[recordID].s1[`id${id}`];
             if(value != undefined) {
                 data[id] = value;
             } else {
                 data[id] = '';
             }
         });
+  
+        saveTitle();
     }
-
-    // Assemble the custom title, and save it
-    let postData = new FormData();
-    postData.append('CSRFToken', CSRFToken);
-    postData.append('title', getCustomTitle());
-    fetch(`api/form/${recordID}/title`, {
-        method: 'POST',
-        body: postData
-    });
 }
 
 // Wait for the page to fully load before running our function

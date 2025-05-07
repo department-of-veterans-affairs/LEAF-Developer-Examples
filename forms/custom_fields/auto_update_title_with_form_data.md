@@ -14,6 +14,10 @@ This example replaces the current record's title with form data.
 async function main{{ iID }}() 
     let dataFieldIDs = [1, 2, 3];
 
+    function getCustomTitle() {
+        return `My Custom Title ${data[1]} ${data[2]} ${data[3]}`;
+    }
+
     // Hide this field's label
     document.querySelector('#format_label_{{ iID }}').style.display = 'none';
     
@@ -51,11 +55,9 @@ async function main{{ iID }}()
     }
 
     // Assemble the custom title, and save it
-    let customTitle = `My Custom Title ${data[1]} ${data[2]} ${data[3]}`;
-
     let postData = new FormData();
     postData.append('CSRFToken', CSRFToken);
-    postData.append('title', customTitle);
+    postData.append('title', getCustomTitle());
     fetch(`api/form/${recordID}/title`, {
         method: 'POST',
         body: postData

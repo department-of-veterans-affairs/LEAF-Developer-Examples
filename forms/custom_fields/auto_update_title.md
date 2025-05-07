@@ -1,4 +1,4 @@
-# Automatically update title
+# Automatically update title (form name)
 
 This example appends the name of the form to the end of the current record's title.
 

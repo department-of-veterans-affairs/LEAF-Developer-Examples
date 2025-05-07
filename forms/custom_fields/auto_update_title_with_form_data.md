@@ -14,7 +14,7 @@ Note: If the data fields are all in the same section, place the code in the same
 <script src="js/formQuery.js"></script>
 <script>
 async function main{{ iID }}() {
-    let dataFieldIDs = [1, 2, 3];
+    let dataFieldIDs = [3];
 
     let data = {}; // This is populated automatically
 
@@ -22,7 +22,23 @@ async function main{{ iID }}() {
         return `My Custom Title ${data[1]} ${data[2]} ${data[3]}`;
     }
 
-    function saveTitle() {
+    async function saveTitle() {
+        // Retrieve data from other sections
+        let recordID = {{ recordID }};
+        let query = new LeafFormQuery();
+        query.addTerm('recordID', '=', recordID);
+        query.getData(dataFieldIDs);
+        query.setExtraParams('&x-filterData=');
+        let res = await query.execute();
+        dataFieldIDs.forEach(id => {
+            let value = res[recordID].s1[`id${id}`];
+            if(value != undefined) {
+                data[id] = value;
+            } else {
+                data[id] = '';
+            }
+        });
+      
         let postData = new FormData();
         postData.append('CSRFToken', CSRFToken);
         postData.append('title', getCustomTitle());
@@ -46,33 +62,8 @@ async function main{{ iID }}() {
 
     if(sameSection) {
         // Retrieve data within the same section
-        dataFieldIDs.forEach(id => {
-            document.getElementById(id).addEventListener('change', () => {
-            	dataFieldIDs.forEach(id => {
-                    data[id] = document.getElementById(id).value;
-                });
-                saveTitle();
-            });
-        });
-
-        
+        form.addPostModifyCallback(saveTitle);
     } else {
-        // Retrieve data from other sections
-        let recordID = {{ recordID }};
-        let query = new LeafFormQuery();
-        query.addTerm('recordID', '=', recordID);
-        query.getData(dataFieldIDs);
-        query.setExtraParams('&x-filterData=');
-        let res = await query.execute();
-        dataFieldIDs.forEach(id => {
-            let value = res[recordID].s1[`id${id}`];
-            if(value != undefined) {
-                data[id] = value;
-            } else {
-                data[id] = '';
-            }
-        });
-  
         saveTitle();
     }
 }

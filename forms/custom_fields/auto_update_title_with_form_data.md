@@ -6,13 +6,13 @@ This example replaces the current record's title with form data.
 1. Navigate to your form in the Form Editor.
 2. Create a new field in Section 1 with the `Raw Data` input format.
 3. Open the field's "Programmer" mode, and place the following code in the `html` section.
-4. Modify the code to match your data field IDs and desired format.
+4. Modify the code (dataFieldIDs and getCustomTitle) to match your data field IDs and desired format.
 
 ```html
 <script src="js/formQuery.js"></script>
 <script>
 async function main{{ iID }}() {
-    let dataFieldIDs = [1];
+    let dataFieldIDs = [1, 2, 3];
 
     function getCustomTitle() {
         return `My Custom Title ${data[1]} ${data[2]} ${data[3]}`;

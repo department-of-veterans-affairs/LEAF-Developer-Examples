@@ -14,7 +14,7 @@ Note: If the data fields are all in the same section, place the code in the same
 <script src="js/formQuery.js"></script>
 <script>
 async function main{{ iID }}() {
-    let dataFieldIDs = [3];
+    let dataFieldIDs = [1, 2, 3];
 
     let data = {}; // This is populated automatically
 

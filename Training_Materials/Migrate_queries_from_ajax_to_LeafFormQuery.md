@@ -16,7 +16,7 @@ $.ajax({
 });
 ```
 
-Note that within leaf.va.gov, it's not necessary to set cache: false. Our infrastructure is configured to preserve network resources when there's no changes in the data, and helps ensure LEAF runs smoothly even during periods of network congestion.
+Note that within leaf.va.gov, it's not necessary to set cache: false. Our infrastructure is configured to preserve network resources when there's no changes in the data, by using strong [HTTP ETag](https://en.wikipedia.org/wiki/HTTP_ETag) validation. This helps ensure LEAF makes efficient use of network resources, which also provides a better user experience by minimizing loading time.
 
 Here's how the same query would be run with LeafFormQuery:
 ```js
@@ -27,17 +27,7 @@ query.execute().then(result => {
 });
 ```
 
-An older, but still supported method is to use query.onSuccess:
-```js
-let query = new LeafFormQuery();
-query.importQuery({"terms":...);
-query.onSuccess(function(result) {
-    // do something with the result
-});
-query.execute();
-```
-
-And here's how program flow can be made easier to read:
+We also recommend that larger programs take advantage of modern JavaScript syntax such as [async/await](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function) to improve code readability:
 ```js
 async function myFunction() {
     let query = new LeafFormQuery();
@@ -67,4 +57,3 @@ async function main() {
 document.addEventListener('DOMContentLoaded', main);
 </script>
 ```
-

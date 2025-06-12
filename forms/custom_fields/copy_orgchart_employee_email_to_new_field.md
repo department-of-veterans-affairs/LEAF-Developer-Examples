@@ -13,7 +13,7 @@ $(async function() {
 
 	let empSel = await leaf_employeeSelector[{{ iID }}];
 	empSel.addSelectHandler(function(id) {
-		$(`#${emailFieldID}`).val(empSel.selectionData[empSel.selection].data[6].data);
+        document.querySelector(`#${emailFieldID}`).value = empSel.selectionData[empSel.selection].data[6].data;
   	});
 });
   

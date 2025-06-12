@@ -39,7 +39,7 @@ async function myFunction() {
 ```
 Note that **await** must be nested within an **async function**.
 
-Now imagine you need to retrieve 100,000 records. This might take a few seconds, and we want to avoid making the browser appear to freeze. With LeafFormQuery, large queries are automatically split into sections, and we can let users know how things are progressing:
+Now imagine you need to retrieve 100,000 records. This might take some time, and we want to avoid making the browser appear to freeze. With LeafFormQuery, large queries are automatically split into sections, and we can let users know how things are progressing:
 ```html
 <div id="progress"></div>
 <script>

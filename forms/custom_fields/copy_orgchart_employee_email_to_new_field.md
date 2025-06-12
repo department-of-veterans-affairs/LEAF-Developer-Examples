@@ -9,12 +9,12 @@ Change 3770 to the ID for the destination text field.
 <script>
 
 $(async function() {
-	var emailFieldID = 3770;
-
-	let empSel = await leaf_employeeSelector[{{ iID }}];
-	empSel.addSelectHandler(function(id) {
+    let emailFieldID = 3770;
+    
+    let empSel = await leaf_employeeSelector[{{ iID }}];
+    empSel.addSelectHandler(function(id) {
         document.querySelector(`#${emailFieldID}`).value = empSel.selectionData[empSel.selection].data[6].data;
-  	});
+    });
 });
   
 </script>

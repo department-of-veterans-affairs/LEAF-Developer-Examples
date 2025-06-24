@@ -524,9 +524,12 @@ async function showProposal(encodedProposal) {
         }
     }
 
+    let origLink = `<p style="margin-top: 5rem"><a href="report.php?a=LEAF_Propose_Actions&proposal=${encodedProposal}&original=true">View original proposal</a></p>`;
+    document.querySelector('#proposalStatus').insertAdjacentHTML('afterend', origLink);
+
     if(Object.keys(data).length == 0) {
         document.querySelector('#grid').style.display = 'none';
-        document.querySelector('#proposalStatus').innerHTML = '<p>There are no actionable records in this proposal.</p>';
+        document.querySelector('#proposalStatus').innerHTML = `<p>There are no actionable records in this proposal.</p>`;
         return;
     }
 
@@ -651,15 +654,106 @@ async function showProposal(encodedProposal) {
     });
 }
 
+async function showOriginalProposal(encodedProposal) {
+    document.querySelector('#proposal').style.display = 'block';
+
+    let proposal = LZString.decompressFromBase64(encodedProposal);
+    proposal = JSON.parse(proposal);
+    
+    document.querySelector('#reviewTitle').innerText = 'Original Proposal for: ' + proposal.title;
+    document.querySelector('#reviewDescription').innerText = proposal.description;
+
+    let activeCategoryData = await fetch('api/formStack/categoryList').then(res => res.json());
+    let activeCategories = {};
+    // need this to provide a cleaner view (e.g. avoid showing names of stapled forms)
+    activeCategoryData.forEach(cat => {
+        activeCategories[cat.categoryID] = cat;
+    });
+
+    let actionText = {};
+    proposal.actions.forEach(action => {
+        actionText[action.type] = action.text;
+    });
+
+    let query = new LeafFormQuery();
+    for(let i in proposal.decisions) {
+        query.addTerm('recordID', '=', i, 'OR');
+    }
+    query.join('categoryName');
+    query.join('service');
+    proposal.indicatorIDs.forEach(indicator => {
+        if(Number.isFinite(+indicator.indicatorID)) {
+            query.getData(indicator.indicatorID);
+        }
+    });
+    let data = await query.execute();
+
+    if(Object.keys(data).length == 0) {
+        document.querySelector('#grid').style.display = 'none';
+        document.querySelector('#proposalStatus').innerHTML = `<p>There are no actionable records in this proposal.</p>`;
+        return;
+    }
+
+    let grid = new LeafFormGrid('grid');
+    grid.setDataBlob(data);
+    grid.hideIndex();
+
+    let headers = [
+        {name: '#', indicatorID: 'uid', editable: false, callback: function(data, blob) {
+            document.querySelector(`#${data.cellContainerID}`).innerHTML = `<span style="background-color: black; color: white; padding: 4px; margin: 4px">${data.recordID}</span>`;
+        }},
+		{name: 'Type', indicatorID: 'type', editable: false, callback: function(data, blob) {
+            let primaryCategory = getPrimaryCategory(activeCategories, blob[data.recordID].categoryIDs);
+            document.querySelector(`#${data.cellContainerID}`).innerHTML = primaryCategory.categoryName;
+        }},
+        {name: 'Title', indicatorID: 'title', editable: false, callback: function(data, blob) {
+            document.querySelector(`#${data.cellContainerID}`).innerHTML = `<a href="index.php?a=printview&recordID=${data.recordID}" target="_blank">${blob[data.recordID].title}</a>`;
+        }},
+        {name: 'Proposed Action', indicatorID: 'decision', editable: false, callback: function(data, blob) {
+            let htmlActions = '';
+            proposal.actions.forEach(action => {
+                if(action.type == proposal.decisions[data.recordID]) {
+                    htmlActions += action.text;
+                }
+            });
+
+            let proposedAction = actionText[proposal.decisions[data.recordID]];
+            document.querySelector(`#${data.cellContainerID}`).style.backgroundColor = '#fee685';
+            
+            document.querySelector(`#${data.cellContainerID}`).innerHTML = htmlActions;
+        }},
+        {name: 'Comments', indicatorID: 'comments', editable: false, callback: function(data, blob) {
+            document.querySelector(`#${data.cellContainerID}`).style.backgroundColor = '#e0e0e0';
+            let comment = `<p>${scrubHTML(proposal.comments[data.recordID])}</p>`;
+            document.querySelector(`#${data.cellContainerID}`).innerHTML = comment;
+        }},
+    ];
+
+    proposal.indicatorIDs.forEach(indicator => {
+        let newHeader = getDataHeader(indicator.indicatorID, null, indicator, true);
+        headers.splice(headers.length - 2, 0, newHeader);
+    });
+
+    grid.setHeaders(headers);
+    grid.renderBody();
+
+    let origLink = `<p style="margin-top: 5rem"><a href="report.php?a=LEAF_Propose_Actions&proposal=${encodedProposal}">View actionable records</a></p>`;
+    document.querySelector('#proposalStatus').innerHTML = origLink;
+}
+
 async function main() {
     document.querySelector('title').innerText = 'Proposed Actions';
 
     const urlParams = new URLSearchParams(window.location.search);
     let stepID = urlParams.get('stepID');
     let proposal = urlParams.get('proposal');
+    let viewOrig = urlParams.get('original');
 
-    if(proposal != null) {
+    if(proposal != null && viewOrig == null) {
         showProposal(proposal);
+    }
+    else if(proposal != null && viewOrig != null) {
+        showOriginalProposal(proposal);
     }
     else if(stepID != null) {
         setupProposals(stepID);

@@ -3,6 +3,8 @@
 This provides a brute-force search capability for email history. Since it's currently not possible to efficiently search within email history, this iterates through the "View History" output for each request.
 <img width="1239" height="352" alt="image" src="https://github.com/user-attachments/assets/49bb2e17-1e5d-4e49-95eb-5bffae1744e4" />
 
+## Prerequisite
+1. This file must be loaded in the Report Programmer area
 
 ```html
 <script src="../libs/js/LEAF/intervalQueue.js"></script>

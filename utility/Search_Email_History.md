@@ -101,11 +101,16 @@ async function search() {
     
     if(email != '') {
         for(let i in data) {
+            let foundEmail = false;
             data[i].history.forEach(item => {
-            	if(item.emailHistory.indexOf(email) == -1) {
-                    delete data[i];
+            	if(item.emailHistory.indexOf(email) >= 0) {
+                    foundEmail = true;
                 }
             });
+
+            if(foundEmail == false) {
+                delete data[i];
+            }
         }
     }
     

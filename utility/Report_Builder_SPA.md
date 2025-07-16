@@ -127,11 +127,14 @@ const CSRFToken = '<!--{$CSRFToken}-->';
 const MS_COMPAT_URL = 'EXAMPLE.COM'; // compatibility URL for MS auth
 
 function scrubHTML(input) {
-    	if(input == null) {
-            return '';
-        }
-        let t = new DOMParser().parseFromString(input, 'text/html').body;
-        return t.textContent;
+    if(input == undefined) {
+        return '';
+    }
+    let t = new DOMParser().parseFromString(input, 'text/html').body;
+    while(input != t.textContent) {
+        return scrubHTML(t.textContent);
+    }
+    return t.textContent;
 }
 
 function loadWorkflow(recordID, prefixID) {
@@ -193,12 +196,9 @@ function addHeader(column) {
                 indicatorID: 'type',
                 editable: false,
                 callback: function(data, blob) {
-                    let types = '';
-                    for(let i in blob[data.recordID].categoryNames) {
-                        types += blob[data.recordID].categoryNames[i] + ' | ';
+                    if(blob[data.recordID].categoryNames != undefined) {
+                        document.querySelector(`#${data.cellContainerID}`).innerHTML = blob[data.recordID].categoryNames.join(' | ');
                     }
-                    types = types.substr(0, types.length - 3);
-                    document.querySelector(`#${data.cellContainerID}`).innerHTML = types;
             }});
             break;
         case 'status':
@@ -230,6 +230,7 @@ function addHeader(column) {
         case 'dateCancelled':
             filterData['deleted'] = 1;
             filterData['action_history.approverName'] = 1;
+            filterData['action_history.actionType'] = 1;
             leafSearch.getLeafFormQuery().join('action_history');
             headers.push({
                 name: 'Date Cancelled', indicatorID: 'dateCancelled', editable: false, callback: function(data, blob) {
@@ -535,16 +536,10 @@ function loadSearchPrereqs() {
             var groupNames = [];
             var groupIDmap = {};
             var tmp = document.createElement('div');
-            var temp;
             let grid = {};
 
             for(let i in res) {
-                temp = res[i].name;
-                tmp.innerHTML = temp;
-                temp = tmp.textContent || tmp.innerText || '';
-                temp = temp.replace(/[^\040-\176]/g, '');
-
-                resIndicatorList[res[i].indicatorID] = temp;
+                resIndicatorList[res[i].indicatorID] = scrubHTML(res[i].name);
 
                 if(groupList[res[i].categoryID] == undefined) {
                     groupList[res[i].categoryID] = [];
@@ -598,6 +593,7 @@ function loadSearchPrereqs() {
                     const isDisabled = res.find(ele => ele.indicatorID === indID).isDisabled;
                     const isArchivedClass = isDisabled > 0 ? ' is-archived' : '';
                     const isArchivedText = isDisabled > 0 ? ' (Archived)' : '';
+
                     buffer += `<div class="indicatorOption${isArchivedClass}" id="indicatorOption_${indID}" style="display: none"><label class="checkable leaf_check" for="indicators_${indID}" title="indicatorID: ${indID}\n${resIndicatorList[indID]}${isArchivedText}" alt="">`;
                     buffer += `<input type="checkbox" class="icheck leaf_check parent" id="indicators_${indID}" name="indicators[${indID}]" value="${indID}" />`
                     buffer += `<span class="leaf_check"></span> ${resIndicatorList[indID]}${isArchivedText}</label>`;
@@ -796,12 +792,12 @@ function editLabels() {
         if(resIndicatorList[resSelectList[i]] != undefined) {
             buffer += `<tr id="sortID_${resSelectList[i]}">
                 <td>
-                    <input type="color" id="colorPicker${resSelectList[i]}" value="#d1dfff" style="height: 26px;" />
-                    <input type="text" style="min-width: 400px" id="id_${resSelectList[i]}" value="${resIndicatorList[resSelectList[i]]}" />
+                    <input type="color" aria-label="select header background color" id="colorPicker${resSelectList[i]}" value="#d1dfff" style="height: 26px;" />
+                    <input type="text" aria-label="edit header column text" style="min-width: 400px" id="id_${resSelectList[i]}" value="${resIndicatorList[resSelectList[i]]}"/>
                 </td>
                 <td>
-                    <button class="buttonNorm" onclick="editLabels_down(${resSelectList[i]});"><img src="./dynicons/?img=go-down_red.svg&w=16" alt="move down" /></button>
-                    <button class="buttonNorm" onclick="editLabels_up(${resSelectList[i]});"><img src="./dynicons/?img=go-up.svg&w=16" alt="move up" /></button>
+                    <button type="button" aria-label="move column down" class="buttonNorm" onclick="editLabels_down(${resSelectList[i]});"><img src="./dynicons/?img=go-down_red.svg&w=16" /></button>
+                    <button type="button" aria-label="move column up" class="buttonNorm" onclick="editLabels_up(${resSelectList[i]});"><img src="./dynicons/?img=go-up.svg&w=16" /></button>
                 </td>
                 </tr>`;
         }
@@ -831,14 +827,9 @@ function editLabels() {
             indicatorSort[curID] = i + 1;
         });
         var tmp = document.createElement('div');
-        var temp;
         for(let i in resSelectList) {
             if(resIndicatorList[resSelectList[i]] != undefined) {
-                temp = $('#id_' + resSelectList[i]).val();
-                tmp.innerHTML = temp;
-                temp = tmp.textContent || tmp.innerText || '';
-                temp = temp.replace(/[^\040-\176]/g, '');
-                resIndicatorList[resSelectList[i]] = temp;
+                resIndicatorList[resSelectList[i]] = scrubHTML($('#id_' + resSelectList[i]).val());
             }
         }
         gridColorData = Object.assign({ }, tempColorData);
@@ -849,6 +840,7 @@ function editLabels() {
         }
         tempColorData = Object.assign({ }, gridColorData);
 
+        grid.stop();
         $('#generateReport').click();
         dialog.hide();
     });
@@ -916,7 +908,8 @@ function showJSONendpoint() {
     delete query.limit;
     delete query.limitOffset;
     let queryString = JSON.stringify(query);
-    let jsonPath = pwd + leafSearch.getLeafFormQuery().getRootURL() + 'api/form/query/?q=' + queryString + '&x-filterData=recordID,'+ Object.keys(filterData).join(',');
+    let xFilterData = '&x-filterData=recordID,'+ Object.keys(filterData).join(',');
+    let jsonPath = pwd + leafSearch.getLeafFormQuery().getRootURL() + 'api/form/query/?q=' + queryString + xFilterData;
     let powerQueryURL = MS_COMPAT_URL + window.location.pathname;
 
     dialog_message.setTitle('Data Endpoints');
@@ -966,6 +959,7 @@ function showJSONendpoint() {
                 buffer += `async function main() {
                     \u00A0\u00A0\u00A0\u00A0let query = new LeafFormQuery();
                     \u00A0\u00A0\u00A0\u00A0query.importQuery(${queryString});
+                    \u00A0\u00A0\u00A0\u00A0query.setExtraParams("${xFilterData}"); // minimizes network utilization
                     \u00A0\u00A0\u00A0\u00A0let results = await query.execute();
                     \u00A0\u00A0\u00A0\u00A0// Do something with the results
                     }
@@ -1089,16 +1083,9 @@ function createRequest(catID) {
                     //Type number. Sent back on success (UID column of report builder)
                     if (recordID > 0) {
                         newRecordID = parseInt(recordID);  //global
+                        grid.stop();
                         $('#generateReport').click();
                         dialog.hide();
-                        //styling to hilite row for short / simple queries
-                        setTimeout(function () {
-                            let el_ID = grid.getPrefixID() + "tbody_tr" + recordID;
-                            let newRow = document.getElementById(el_ID);
-                            if (newRow !== null) { //null if query > .75s or if the query does not return the record created
-                                newRow.style.backgroundColor = 'rgb(254, 255, 209)';
-                            }
-                        }, 750);
                     }
                 },
                 function (error) {
@@ -1368,10 +1355,7 @@ $(function() {
             }
             temp.name = resIndicatorList[temp.indicatorID] != undefined ? resIndicatorList[temp.indicatorID] : '';
             temp.sort = indicatorSort[temp.indicatorID] == undefined ? 0 : indicatorSort[temp.indicatorID];
-            var tmp = document.createElement('div');
-            tmp.innerHTML = temp.name;
-            temp.name = tmp.textContent || tmp.innerText || '';
-            temp.name = temp.name.replace(/[^\040-\176]/g, '');
+            temp.name = scrubHTML(temp.name);
             if($.isNumeric(resSelectList[i][0]) || $.isNumeric(resSelectList[i])) {
                     headers.push(temp);
                     leafSearch.getLeafFormQuery().getData(temp.indicatorID);
@@ -1388,29 +1372,15 @@ $(function() {
         function renderGrid(res) {
             grid.setDataBlob(res);
 
-            var tGridData = [];
-            for(let i in res) {
-                tGridData.push(res[i]);
+            let sortKey = 'recordID';
+            let sortDirection = 'desc';
+            if(sortPreference.key != undefined && sortPreference.order != undefined) {
+                sortKey = sortPreference.key;
+                sortDirection = sortPreference.order;
             }
+            grid.sort(sortKey, sortDirection);
+            grid.renderBody();
 
-            if(params.get('v') >= 3) {
-                grid.setData(tGridData);
-                let sortKey = 'recordID';
-                let sortDirection = 'desc';
-                if(sortPreference.key != undefined && sortPreference.order != undefined) {
-                    sortKey = sortPreference.key;
-                    sortDirection = sortPreference.order;
-                }
-                grid.sort(sortKey, sortDirection);
-                grid.renderBody();
-            }
-            else {
-                let recordIDs = '';
-                for (let i in res) {
-                    recordIDs += res[i].recordID + ',';
-                }
-                grid.loadData(recordIDs);
-            }
             let gridResults = grid.getCurrentData();
             let filteredGridResults = gridResults.filter(function(r) {
                 return r.categoryID != undefined;
@@ -1485,6 +1455,20 @@ $(function() {
             document.querySelector('#btn_abort').style.display = 'none';
             $('#reportStats').html(`${Object.keys(queryResult).length} records${partialLoad}`);
             renderGrid(queryResult);
+
+            if (+newRecordID > 0) {
+                //styling to hilite row for short / simple queries
+                let el_ID = grid.getPrefixID() + "tbody_tr" + newRecordID;
+                let newRow = document.getElementById(el_ID);
+                if (newRow !== null) { //null if the query does not return the record created or if the row is off page
+                    newRow.style.backgroundColor = 'rgb(254, 255, 209)';
+                }
+                let newRowBtn = document.getElementById('newRequestButton');
+                if(newRowBtn !== null) {
+                    newRowBtn.dataset.newestRowId = newRecordID;
+                }
+            }
+
             //update Checkpoint Date Step header text if still needed (should be rare)
             if(tStepHeader.some(ele => ele === 0)) {
                 $.ajax({
@@ -1605,6 +1589,11 @@ $(function() {
                 checkIfOneTypeSearchedAndUpdate(inQuery.terms);
 
                 t_inIndicators = JSON.parse(LZString.decompressFromBase64(indicators));
+                t_inIndicators.forEach(ind => {
+                    if (+ind?.indicatorID > 0) {
+                       indicatorSort[ind.indicatorID] = ind.sort;
+                    }
+                });
 
                 let queryColors = JSON.parse(LZString.decompressFromBase64(colors));
                 if (queryColors !== null) {

@@ -6,8 +6,6 @@ All actions involving a write operation require a secret token to prevent Cross 
 <!--{$CSRFToken}-->
 ```
 
-To retrieve a large quantity of records, please use the Report Builder to generate a query and endpoint. For very large queries, we recommend using [formQuery.js](https://github.com/department-of-veterans-affairs/LEAF/blob/master/LEAF_Request_Portal/js/formQuery.js), which includes features that improve user-experience such as lazy-loading.
-
 ## Conventions and terminology
 - Retrieving data is a "GET" request
 - Writing data is a "POST" request
@@ -34,6 +32,12 @@ POST api/form/new
   title           string (optional)
   priority        number (optional)
   ```
+
+#### Read / Find one or more records - Example in Report Builder -> JSON -> JavaScript Template
+GET api/form/query
+
+See https://github.com/department-of-veterans-affairs/LEAF-Developer-Examples/blob/master/forms/formQuery.md
+
 #### Update the contents of a field within a record - [Example](https://github.com/department-of-veterans-affairs/LEAF-Developer-Examples/blob/master/forms/custom_fields/copy_orgchart_employee_selection_to_other_field.md)
 POST api/form/[recordID]
   ```

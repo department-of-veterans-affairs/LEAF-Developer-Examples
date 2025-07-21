@@ -64,7 +64,7 @@ Adds a new search term specifically for data tables.
 
 | Valid ID | Supported Operators | Details |
 |---|---|---|
-| data | =, !=, >, >=, <, <=, LIKE, NOT LIKE, MATCH, NOT MATCH, MATCH ALL | N/A |
+| data | =, !=, >, >=, <, <=, LIKE, NOT LIKE, MATCH, NOT MATCH, MATCH ALL |  |
 | dependencyID | =, != |  |
 
 ### `importQuery(queryObject)`

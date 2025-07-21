@@ -20,8 +20,9 @@ The following is a list of commonly used APIs, their parameters, and examples of
 
 ### Records ([api/form](https://github.com/department-of-veterans-affairs/LEAF/blob/master/LEAF_Request_Portal/api/controllers/FormController.php))
 
-#### Create a new record - [Example](https://github.com/department-of-veterans-affairs/LEAF-Developer-Examples/blob/master/forms/create_new_request.tpl)
-POST api/form/new
+#### Create a new record
+POST api/form/new ([Example](https://github.com/department-of-veterans-affairs/LEAF-Developer-Examples/blob/master/forms/create_new_request.tpl))
+
   ```
   CSRFToken       string (required)
   numform_FORM_ID 1      (required) Replace FORM_ID with the form ID
@@ -33,13 +34,14 @@ POST api/form/new
   priority        number (optional)
   ```
 
-#### Read / Find one or more records - Example in Report Builder -> JSON -> JavaScript Template
-GET api/form/query
+#### Read one or more records
+GET api/form/query (Example in Report Builder -> JSON -> JavaScript Template)
 
 See https://github.com/department-of-veterans-affairs/LEAF-Developer-Examples/blob/master/forms/formQuery.md
 
-#### Update the contents of a field within a record - [Example](https://github.com/department-of-veterans-affairs/LEAF-Developer-Examples/blob/master/forms/custom_fields/copy_orgchart_employee_selection_to_other_field.md)
-POST api/form/[recordID]
+#### Update the contents of a field within a record
+POST api/form/[recordID] ([Example](https://github.com/department-of-veterans-affairs/LEAF-Developer-Examples/blob/master/forms/custom_fields/copy_orgchart_employee_selection_to_other_field.md)
+)
   ```
   CSRFToken      string (required)
   FIELD_ID       string (optional) Replace FIELD_ID with the field ID
@@ -49,7 +51,7 @@ POST api/form/[recordID]
   Special considerations: The "grid" input format expects data to be formatted as in [this example](https://github.com/department-of-veterans-affairs/LEAF-Developer-Examples/blob/master/forms/update_grid_formatted_field.tpl).
 
 #### Cancel a record
-POST api/form/[recordID]/cancel - [Example](https://github.com/department-of-veterans-affairs/LEAF-Developer-Examples/blob/master/forms/cancel_request.md)
+POST api/form/[recordID]/cancel ([Example](https://github.com/department-of-veterans-affairs/LEAF-Developer-Examples/blob/master/forms/cancel_request.md))
   ```
   CSRFToken      string (required)
   comment        string (optional)
@@ -57,7 +59,7 @@ POST api/form/[recordID]/cancel - [Example](https://github.com/department-of-vet
 
 ### Workflow for a record ([api/formWorkflow](https://github.com/department-of-veterans-affairs/LEAF/blob/master/LEAF_Request_Portal/api/controllers/FormWorkflowController.php))
 
-#### Take an action on a record
+#### Apply an action to a record
 POST api/formWorkflow/[recordID]/apply
   ```
   CSRFToken      string (required)

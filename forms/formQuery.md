@@ -18,13 +18,13 @@
     *   [setRootURL(url)](#setrooturlurl)
     *   [onSuccess(funct)](#onsuccessfunct)
     *   [onProgress(funct)](#onprogressfunct)
-    *   [setAbortSignal(signal)](#setabortsignal-signal)
+    *   [setAbortSignal(signal)](#setabortsignalsignal)
     *   [execute()](#execute)
 
 
 ## Overview
 
-`LeafFormQuery` is a globally available object on LEAF sites, providing an interface for querying data via the `./api/form/query` endpoint. It offers features like automatic query splitting for improved UX, progress reporting, programmatic query building, and abort signal support.
+`LeafFormQuery` ([formQuery.js](https://github.com/department-of-veterans-affairs/LEAF/blob/master/LEAF_Request_Portal/js/formQuery.js)) is a globally available object on LEAF sites that provides an interface for querying data via the `./api/form/query` endpoint. It provides features that improve user experience, such as processing large queries in smaller chunks, which helps avoid perceived slowdowns in web browsers.
 
 ## Methods
 
@@ -32,100 +32,102 @@
 
 Adds a new search term.
 
-*   `id`: (string, required, must be one of the valid IDs listed below) The column ID to search.
-*   `operator`: (string, required, must be one of the valid operators listed below) The SQL comparison operator.
+*   `id`: (string) The column ID to search. Must be one of the supported IDs listed below.
+*   `operator`: (string) The comparison operator. Must be one of the supported operators listed below.
+*   `match`: (string) The value to search for.
+*   `gate`: (string, optional, default: "AND") The logical gate ("AND" or "OR") to combine with the next term.
 
-| Valid ID      | Supported Operators | Supported Match Terms |
+| Supported IDs      | Supported Operators | Details |
 |---------------|---------------------|-----------------------|
-| recordID      | =, !=, >, >=, <, <=  | N/A                   |
-| recordIDs     | =                   | IN clause             |
-| serviceID     | =, !=, >, >=, <, <=  | N/A                   |
-| submitted     | =, !=, >, >=, <, <=  | N/A                   |
-| deleted       | =, !=, >, >=, <, <=  | N/A                   |
-| title         | =, !=, >, >=, <, <=, LIKE, NOT LIKE | N/A                   |
-| userID        | =, !=, >, >=, <, <=  | N/A                   |
-| date          | =, <=, >             | strtotime             |
-| dateInitiated | =, <=, >             | strtotime             |
-| dateSubmitted | =, <=, >             | strtotime             |
-| categoryID    | =, !=                | N/A                   |
+| recordID      | =, !=, >, >=, <, <=  |                    |
+| recordIDs     | =                    | CSV list of recordIDs             |
+| serviceID     | =, !=, >, >=, <, <=  |                    |
+| submitted     | =, !=, >, >=, <, <=  | UNIX Timestamp                   |
+| deleted       | =, !=, >, >=, <, <=  | UNIX Timestamp                   |
+| title         | =, !=, >, >=, <, <=, LIKE, NOT LIKE | Wildcard: *              |
+| userID        | =, !=, >, >=, <, <=  |                    |
+| date          | =, <=, >             | Supports all [strtotime](https://www.php.net/manual/en/function.strtotime.php) formats  |
+| dateInitiated | =, <=, >             | Supports all [strtotime](https://www.php.net/manual/en/function.strtotime.php) formats  |
+| dateSubmitted | =, <=, >             | Supports all [strtotime](https://www.php.net/manual/en/function.strtotime.php) formats  |
+| categoryID    | =, !=                |                   |
 | stepID        | =, !=                | submitted, notSubmitted, deleted, notDeleted, resolved, notResolved, actionable, or a numeric step ID |
 
 ### `addDataTerm(id, indicatorID, operator, match, gate)`
 
 Adds a new search term specifically for data tables.
 
-*   `id`: (string, required, must be one of the valid IDs listed below) Column ID or 'data' to search data table or 'dependencyID' to search records\_dependencies data, matching on 'filled'.
-*   `indicatorID`: (string|number, required) Indicator ID or dependency ID. Use "0" to search all indicators.
-*   `operator`: (string, required, must be one of the valid operators listed below) The SQL comparison operator.
+*   `id`: (string) Column ID or 'data' to search data table or 'dependencyID' to search records_dependencies data, matching on 'filled'. Must be one of the supported IDs listed below.
+*   `indicatorID`: (string) Indicator ID or dependency ID. Use "0" to search all indicators.
+*   `operator`: (string) The comparison operator. Must be one of the supported operators listed below.
 *   `match`: (string) The value to search for.
 *   `gate`: (string, optional, default: "AND") The logical gate ("AND" or "OR") to combine with the next term.
 
-| Valid ID | Supported Operators | Supported Match Terms |
+| Valid ID | Supported Operators | Details |
 |---|---|---|
 | data | =, !=, >, >=, <, <=, LIKE, NOT LIKE, MATCH, NOT MATCH, MATCH ALL | N/A |
-| dependencyID | =, != | N/A |
+| dependencyID | =, != |  |
 
 ### `importQuery(queryObject)`
 
-Imports a query object generated by `formSearch`.
+Imports a query object generated by the Report Builder -> JSON -> JavaScript Template.
 
-*   `queryObject`: (object) A JSON object with `terms`, `joins`, and `getData` arrays.  `getData` is renamed internally to avoid conflicts.
+*   `queryObject`: (object) A JS object with representing a LEAF query.
 
 **Example:**
 
 ```javascript
 const queryData = {
-  terms: [],
-  joins: ['service'],
+  terms: [{id: 'stepID', operator: '=', match: 'notResolved'}],
+  joins: ['status'],
   getData: [1, 2, 3]
 };
 formQuery.importQuery(queryData);
 ```
 ### `setLimit(offset, limit)`
 
-Sets the query limit.
+Sets the query offset/limit based on MySQL offset and limit conventions.
 
-*   `offset`: (number, optional, default: 50) The offset for pagination.
-*   `limit`: (number, optional) The maximum number of results to return. If only `offset` is provided, it's used as the limit.
+*   `offset`: (number, default: 50) The offset based on the number of internal query matches. If `limit` is not specified provided this becomes the maximum number of results to return.
+*   `limit`: (number, optional) The maximum number of results to return.
 
 **Example:**
 
 ```javascript
-formQuery.setLimit(100, 20); // Set offset to 100 and limit to 20
-formQuery.setLimit(50); // Set both offset and limit to 50
+formQuery.setLimit(100, 20); // Fast-forward 100 records, and get 20 records.
+formQuery.setLimit(50); // Get the first 50 records
 ```
 ### `setLimitOffset(offset)`
 
 Sets the query limit offset.
 
-*   `offset`: (number, optional, default: 50) The offset for pagination.
+*   `offset`: (number, optional, default: 50) The offset based on the number of internal query matches.
 
 **Example:**
 
 ```javascript
-formQuery.setLimitOffset(25); // Set the offset to 25
+formQuery.setLimitOffset(25); // Skip the first 25 records
 ```
 ### `join(table)`
 
 Adds a table to join to the query.
 
-*   `table`: (string, optional, default: "") The name of the table to join.
+*   `table`: (string) The name of the table to join.
 
 **Valid Options:**
 
-*   `service`: Joins the `services` table.
-*   `status`: Joins the `records_workflow_state` and `workflow_steps` tables.
-*   `categoryName`: Joins the `category_count` table.
-*   `categoryNameUnabridged`: Joins the `category_count` table, including disabled categories.
-*   `recordsDependencies`: Joins the `records_dependencies` table.
-*   `action_history`: Joins the `action_history` and related tables.
-*   `stepFulfillment`: Joins the `records_step_fulfillment` and `workflow_steps` tables.
-*   `stepFulfillmentOnly`: Joins the `records_step_fulfillment` table.
-*   `recordResolutionData`: Joins tables related to record resolution data.
-*   `recordResolutionBy`: Joins tables related to record resolution by user.
-*   `initiatorName`: Joins tables to retrieve initiator name information.
-*   `destructionDate`: Joins tables related to destruction date information.
-*   `unfilledDependencies`: Joins tables related to unfilled dependencies.
+*   `service`: Includes data related to the record's service
+*   `status`: Includes the record's current status
+*   `categoryName`: Includes the record's form type(s)
+*   `categoryNameUnabridged`: Includes the record's form type(s), and also inactive forms
+*   `recordsDependencies`: Includes data related to fulfilled requirements and their timestamps related to a record
+*   `action_history`: Includes the record's history of actions
+*   `stepFulfillment`: Includes fulfillment information related to workflow steps
+*   `stepFulfillmentOnly`: Includes fulfillment information related to workflow steps, for steps that have been fulfilled
+*   `recordResolutionData`: Include general resolution data
+*   `recordResolutionBy`: Include data related to the individual who resolved a record
+*   `initiatorName`: Include the record initiator's name
+*   (Not implemented yet) `destructionDate`: 
+*   `unfilledDependencies`: Include list of unfulfilled requirements
 
 **Example:**
 
@@ -163,7 +165,7 @@ formQuery.sort('title'); // Sort by title in descending order (default)
 Updates an existing search term.
 
 *   `id`: (string) The column ID of the term to update.
-*   `operator`: (string) The SQL comparison operator.
+*   `operator`: (string) The comparison operator.
 *   `match`: (string) The new search term.
 *   `gate`: (string) The logical gate.
 
@@ -178,7 +180,7 @@ Updates an existing data search term.
 
 *   `id`: (string) The column ID of the term to update.
 *   `indicatorID`: (string) The indicator ID.
-*   `operator`: (string) The SQL comparison operator.
+*   `operator`: (string) The comparison operator.
 *   `match`: (string) The new search term.
 *   `gate`: (string) The logical gate.
 
@@ -196,7 +198,7 @@ Adds extra parameters to the end of the query API URL.
 **Example:**
 
 ```javascript
-formQuery.setExtraParams('&sort=date'); // Add a sort parameter to the URL
+formQuery.setExtraParams('&x-filterData=title'); // data filter limits responses to only show titles
 ```
 ### `setRootURL(url)`
 
@@ -207,7 +209,7 @@ Sets the root URL for the API endpoint.
 **Example:**
 
 ```javascript
-formQuery.setRootURL('https://api.example.com'); // Set the root URL
+formQuery.setRootURL('https://api.example.com/VISN5/688/resources'); // Set the root URL
 ```
 ### `onSuccess(funct)`
 

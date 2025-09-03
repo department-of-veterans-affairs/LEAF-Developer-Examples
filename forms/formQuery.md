@@ -73,9 +73,9 @@ Adds a new search term.
 | deleted       | =, !=, >, >=, <, <=  | UNIX Timestamp                   |
 | title         | =, !=, >, >=, <, <=, LIKE, NOT LIKE | Wildcard: *              |
 | userID        | =, !=  |                    |
-| date          | =, <=, >             | UNIX Timetamp and also supports all [strtotime](https://www.php.net/manual/en/function.strtotime.php) formats  |
-| dateInitiated | =, <=, >             | UNIX Timetamp and also supports all [strtotime](https://www.php.net/manual/en/function.strtotime.php) formats  |
-| dateSubmitted | =, <=, >             | UNIX Timetamp and also supports all [strtotime](https://www.php.net/manual/en/function.strtotime.php) formats. E.g. dateSubmitted > 'last year' retrieves all records submitted within the last year  |
+| date          | =, <=, >             | UNIX Timetamp and all [strtotime](https://www.php.net/manual/en/function.strtotime.php) formats  |
+| dateInitiated | =, <=, >             | UNIX Timetamp and all [strtotime](https://www.php.net/manual/en/function.strtotime.php) formats  |
+| dateSubmitted | =, <=, >             | UNIX Timetamp and all [strtotime](https://www.php.net/manual/en/function.strtotime.php) formats. E.g. dateSubmitted > 'last year' retrieves all records submitted within the last year  |
 | categoryID    | =, !=                |                   |
 | stepID        | =, !=                | submitted, notSubmitted, deleted, notDeleted, resolved, notResolved, actionable, or a numeric step ID |
 

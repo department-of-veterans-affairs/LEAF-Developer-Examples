@@ -4,6 +4,7 @@
 
 *   [Overview](#overview)
 *   [Quick Start](#quick-start-) 🚀
+*   [Basic Example](#basic-example)
 *   [Methods](#methods)
     *   [addTerm(id, operator, match, gate)](#addtermid-operator-match-gate)
     *   [addDataTerm(id, indicatorID, operator, match, gate)](#adddatatermid-indicatorid-operator-match-gate)
@@ -36,6 +37,21 @@ The LEAF Report Builder can automatically generate a code template. To generate 
 3. Click on "JSON", and select the "JavaScript Template" option
 
 Note that the generated code includes a directive to automatically remove unused metadata to minimize network utilization. To reveal all metadata, remove the `x-filterData` parameter.
+
+## Basic Example
+
+This retrieves all unresolved records:
+
+```javascript
+async function main() {
+    let query = new LeafFormQuery();
+    query.addTerm('stepID', '=', 'notResolved');
+
+    let results = await query.execute();
+    // Do something with the results
+}
+document.addEventListener('DOMContentLoaded', main);
+```
 
 ## Methods
 
@@ -266,6 +282,8 @@ abortController.abort();
 ### `execute()`
 
 Executes the query and returns a [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) resolving to the query response.
+
+The structure of the query response is defined here: https://github.com/department-of-veterans-affairs/LEAF/blob/master/pkg/form/query/response.go
 
 **Example:**
 

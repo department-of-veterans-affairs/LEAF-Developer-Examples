@@ -236,7 +236,7 @@ Sets the root URL for the API endpoint.
 **Example:**
 
 ```javascript
-formQuery.setRootURL('https://api.example.com/VISN5/688/resources'); // Set the root URL
+formQuery.setRootURL('https://leaf.va.gov/Academy/Demo1'); // Set the root URL
 ```
 ### `onSuccess(funct)`
 

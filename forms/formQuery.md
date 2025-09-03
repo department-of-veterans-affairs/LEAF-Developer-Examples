@@ -29,11 +29,13 @@
 
 ## Quick Start 🚀
 
-The LEAF Report Builder can auto-generate a LeafFormQuery template. To generate a template:
+The LEAF Report Builder can automatically generate a code template. To generate it:
 
 1. Navigate to the Report Builder
 2. Generate a report
 3. Click on "JSON", and select the "JavaScript Template" option
+
+Note that the generated code includes a directive to automatically remove unused metadata to minimize network utilization. To reveal all metadata, remove the `x-filterData` parameter.
 
 ## Methods
 

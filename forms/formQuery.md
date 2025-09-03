@@ -3,6 +3,7 @@
 ## Table of Contents
 
 *   [Overview](#overview)
+*   [Quick Start](#quick-start-) 🚀
 *   [Methods](#methods)
     *   [addTerm(id, operator, match, gate)](#addtermid-operator-match-gate)
     *   [addDataTerm(id, indicatorID, operator, match, gate)](#adddatatermid-indicatorid-operator-match-gate)
@@ -25,6 +26,14 @@
 ## Overview
 
 `LeafFormQuery` ([formQuery.js](https://github.com/department-of-veterans-affairs/LEAF/blob/master/LEAF_Request_Portal/js/formQuery.js)) is a globally available object on LEAF sites that provides an interface for querying data via the `./api/form/query` endpoint. It provides features that improve user experience, such as processing large queries in smaller chunks, which helps avoid perceived slowdowns in web browsers.
+
+## Quick Start 🚀
+
+The LEAF Report Builder can auto-generate a LeafFormQuery template. To generate a template:
+
+1. Navigate to the Report Builder
+2. Generate a report
+3. Click on "JSON", and select the "JavaScript Template" option
 
 ## Methods
 
@@ -239,7 +248,7 @@ formQuery.onProgress(function(progress) {
 ```
 ### `setAbortSignal(signal)`
 
-Sets an AbortSignal to cancel the query.
+Sets an [AbortSignal](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal) to cancel the query.
 
 *   `signal`: (AbortSignal) The AbortSignal object.
 
@@ -254,7 +263,7 @@ abortController.abort();
 ```
 ### `execute()`
 
-Executes the query and returns a Promise resolving to the query response.
+Executes the query and returns a [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) resolving to the query response.
 
 **Example:**
 

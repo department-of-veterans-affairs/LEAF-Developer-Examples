@@ -25,13 +25,13 @@ POST api/form/new ([Example](https://github.com/department-of-veterans-affairs/L
 
   ```
   CSRFToken       string (required)
-  numform_FORM_ID 1      (required) Replace FORM_ID with the form ID
-  FIELD_ID        string (optional) Replace FIELD_ID with the field ID, used to prepopulate a record
+  numform_FORM_ID 1      (required) Replace FORM_ID with the form ID. The payload for this parameter must be the number 1.
+  FIELD_ID        string (optional) Replace FIELD_ID with the field ID (number). This is typically used to prepopulate a record.
   ...
   FIELD_ID                          Many FIELD_IDs can be added simultaneously
   service         number (optional) Service ID
   title           string (optional)
-  priority        number (optional)
+  priority        number (optional) Lower numbers have higher priority
   ```
 
 #### Read one or more records

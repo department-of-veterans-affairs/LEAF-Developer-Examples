@@ -1,0 +1,1174 @@
+/* =============================================================================
+   DARK MODE IMPLEMENTATION
+   Uses prefers-color-scheme to automatically detect OS dark mode setting
+   ============================================================================= */
+
+/* Define CSS custom properties for consistent theming */
+:root {
+  /* Light mode colors (default) */
+
+  /* Background Colors */
+  --bg-header: linear-gradient(#F3F3F3, #BBCAE4);
+  --bg-warning: #9D0000;
+  --text-warning: #ffffff;
+  --border-warning: #000000;
+  --text-header-link: #004B76;
+  --menu-bg: #E8F2FF;
+  --menu-hover-bg: #2372B0;
+
+  /* Side menu */
+  --bg-card-1: #2372B0;
+  --bg-card-2: #B6EF6D;
+  --bg-card-3: #7EB2B3;
+  --bg-card-4: #000000;
+  --text-cards-light: #FFFFFF;
+  --text-cards-dark: #000000;
+
+  /* Homepage Table */
+  --bg-homepage-table-header-primary: #D1DFFF;
+  --bg-homepage-table-header-secondary: #79A2FF;
+  --bg-homepage-table-header-hover-select: #79A2FF;
+  --bg-homepage-table-row-primary: #FFFFFF;
+  --bg-homepage-table-row-secondary: #FEFFD1;
+  --text-homepage-table-header: #000000;
+  --text-homepage-table-row: #000000;
+  --border-table-primary: #000000;
+  --border-table-secondary: #000000;
+
+  /* Primary light mode colors */
+  --bg-primary: #F3F3F3;
+  --bg-secondary: #FFFFFF;
+  --bg-tertiary: #C7CACE;
+  --bg-quaternary: #DFE1E2;
+
+  --text-primary: #000000;
+
+  --bg-button-primary: #E8F2FF;
+  --bg-button-primary-hover: #2372B0;
+  --text-button-primary-hover: #FFFFFF;
+
+  --bg-input-box-primary: #F3F3F3;
+
+  --bg-counter: #000000;
+  --text-counter: #FFFFFF;
+}
+
+/* Dark mode colors */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Header */
+    --bg-header: linear-gradient(#131314, #29354F);
+    --bg-warning: #9A0603;
+    --text-warning: #ffffff;
+    --border-warning: #000000;
+    --text-header-link: #3C93FC;
+    --menu-bg: #162E51;
+    --menu-hover-bg: #4A77B4;
+
+    /* Side menu */
+    --bg-card-1: #2372B0;
+    --bg-card-2: #216E1F;
+    --bg-card-3: #2E8367;
+    --bg-card-4: #000000;
+    --text-cards-light: #FFFFFF;
+    --text-cards-dark: #FFFFFF; /* backwards compat */
+
+    /* Homepage Table */
+    --bg-homepage-table-header-primary: #162E51;
+    --bg-homepage-table-header-secondary: #1A4480;
+    --bg-homepage-table-header-hover-select: #4A77B4;
+    --bg-homepage-table-row-primary: #DFE1E2;
+    --bg-homepage-table-row-secondary: #A9AEB1;
+    --text-homepage-table-header: #FFFFFF;
+    --text-homepage-table-row: #1A1A1A;
+    --border-table-primary: #CACACA;
+    --border-table-secondary: #797979;
+
+    /* Primary dark mode colors */
+    --bg-primary: #71767A;
+    --bg-secondary: #A9AEB1;
+    --bg-tertiary: #C7CACE;
+    --bg-quaternary: #DFE1E2;
+
+    --text-primary: #DFDFDF;
+
+    --bg-button-primary: #4A77B4;
+    --bg-button-primary-hover: #BBCAE4;
+    --text-button-primary-hover: #000000;
+
+    --bg-input-box-primary: #F3F3F3;
+
+    --bg-counter: #1A1A1A;
+    --text-counter: #F3F3F3;
+  }
+}
+
+/* =============================================================================
+   BASE STYLES
+   ============================================================================= */
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+body a:link,
+body a:visited {
+  color: var(--text-header-link);
+}
+
+table.leaf_grid tr td a:link,
+table.leaf_grid tr td a:visited {
+  color: var(--text-link);
+}
+
+table.leaf_grid tr td span.browsecounter a:link,
+table.leaf_grid tr td span.browsecounter a:visited {
+  background-color: var(--bg-counter);
+  color: var(--text-counter);
+}
+
+.table_editable:hover > .browsetypes {
+  color: var(--text-homepage-table-header);
+}
+
+/* Hover state for table cells - make all text elements match browsetypes color */
+table.leaf_grid tr td:hover span.browsecounter,
+table.leaf_grid tr td:hover span.browsecounter a {
+  color: var(--text-homepage-table-header) !important;
+  background-color: var(--bg-homepage-table-header-hover-select) !important;
+}
+
+table.leaf_grid tr td:hover > a {
+  color: var(--text-homepage-table-header) !important;
+  background-color: var(--bg-homepage-table-header-hover-select) !important;
+}
+
+table.leaf_grid tr td:hover span.browsetypes {
+  color: var(--text-homepage-table-header);
+  background-color: var(--bg-homepage-table-header-hover-select) !important;
+}
+
+span.browsetypes {
+    font-size: 11px;
+    color: var(--text-homepage-table-row);
+}
+
+span#headerHelp {
+  color: var(--text-primary);
+}
+
+input {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--border-tertiary);
+}
+
+#headerMenu_container .menuDescSmall,
+#headerMenu_container .menuTextSmall {
+  color: var(--text-homepage-table-row);
+}
+
+@media (prefers-color-scheme: dark) {
+  input {
+    background-color: var(--bg-tertiary);
+    border-color: var(--border-secondary);
+  }
+}
+
+textarea {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--border-tertiary);
+}
+
+@media (prefers-color-scheme: dark) {
+  textarea {
+    background-color: var(--bg-tertiary);
+    border-color: var(--border-secondary);
+  }
+}
+
+select {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--border-tertiary);
+}
+
+@media (prefers-color-scheme: dark) {
+  select {
+    background-color: var(--bg-tertiary);
+    border-color: var(--border-secondary);
+  }
+}
+
+/* =============================================================================
+   HEADER STYLES
+   ============================================================================= */
+
+#header {
+  background-image: var(--bg-header);
+}
+
+#headerDescription {
+  color: var(--text-primary);
+}
+
+#headerHelp #divider {
+  color: var(--text-primary);
+}
+
+span#headerLabel {
+  color: var(--text-header-link);
+}
+
+@media (prefers-color-scheme: dark) {
+  span#headerLabel {
+    color: var(--text-primary);
+  }
+}
+
+#headerMenu > a,
+#headerMenu_container > a,
+#headerMenuHelp_container > a {
+  color: var(--text-primary);
+}
+
+#headerMenuNav > ul > li > button,
+#headerMenuNav > ul > li > a {
+  color: var(--text-primary);
+}
+
+#headerMenu_links,
+#headerMenu_help {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-primary);
+  box-shadow: 0 2px 6px var(--shadow-color);
+  color: var(--text-homepage-table-row);
+}
+
+/* =============================================================================
+   CONTENT AREAS
+   ============================================================================= */
+
+#card1, #card2, #card3, #card4 {
+  border-color: var(--border-primary);
+  box-shadow: 0 2px 6px var(--shadow-color);
+}
+
+#card1 {
+  color: var(--text-cards-light);
+  background-color: var(--bg-card-1);
+}
+
+#card2 {
+  color: var(--text-cards-dark);
+  background-color: var(--bg-card-2);
+}
+
+#card3 {
+  color: var(--text-cards-dark);
+  background-color: var(--bg-card-3);
+}
+
+#card4 {
+  color: var(--text-cards-light);
+  background-color: var(--bg-card-4);
+}
+
+#content {
+  background-color: var(--bg-primary);
+}
+
+#maincontent {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-light);
+  box-shadow: 0 2px 4px var(--shadow-color);
+}
+
+/* =============================================================================
+   ALERTS AND NOTIFICATIONS
+   ============================================================================= */
+
+.warning {
+  background-color: var(--bg-warning);
+  border: 2px solid;
+  border-color: var(--border-warning);
+  font-weight: bold;
+  font-size: 16px;
+  padding: 4px;
+}
+
+div.warning span {
+  color: var(--text-warning);
+}
+
+.alert {
+  background-color: var(--bg-alert);
+  color: var(--text-primary);
+  border-color: var(--border-primary);
+}
+
+.alert > span {
+  color: var(--text-inverse);
+}
+
+.alert a:link,
+.alert a:visited {
+  color: #bddcfb;
+}
+
+@media (prefers-color-scheme: dark) {
+  .alert a:link,
+  .alert a:visited {
+    color: #93c5fd;
+  }
+}
+
+/* =============================================================================
+   ORGANIZATIONAL CHART COMPONENTS
+   ============================================================================= */
+
+/* Position Cards */
+.positionSmall {
+  background-color: var(--position-bg);
+  border-color: var(--border-primary);
+}
+
+.positionSmall:hover {
+  background-color: var(--hover-bg);
+  color: var(--hover-text);
+}
+
+.positionSmall_title {
+  background-color: var(--position-title-bg);
+}
+
+.positionSmall_data {
+  color: var(--text-primary);
+}
+
+/* Group Cards */
+.groupSmall {
+  background-color: var(--group-bg);
+  border-color: var(--border-primary);
+}
+
+.groupSmall_title {
+  background-color: var(--group-title-bg);
+}
+
+/* Employee Cards */
+.employee,
+div.employee {
+  background-color: var(--employee-bg);
+  border-color: var(--border-primary);
+}
+
+.employeeHeader,
+div.employeeHeader {
+  background-color: var(--employee-title-bg);
+}
+
+/* Facility Cards */
+.facility {
+  background-color: var(--facility-bg);
+  border-color: var(--border-primary);
+}
+
+.facilityHeader {
+  background-color: var(--facility-header-bg);
+}
+
+.facilityName {
+  color: var(--text-inverse);
+}
+
+/* =============================================================================
+   TABLES
+   ============================================================================= */
+
+table {
+  background-color: var(--table-row-bg);
+}
+
+table.table,
+table.leaf_grid,
+table.agenda {
+  background-color: var(--bg-homepage-table-row-primary);
+  border-color: var(--table-border);
+}
+
+.table > thead,
+table.leaf_grid th {
+  background-color: var(--bg-homepage-table-header-primary);
+  color: var(--text-homepage-table-header);
+}
+
+.table > tbody,
+table.leaf_grid > tbody {
+  background-color: var(--table-row-bg);
+}
+
+.table td,
+table.leaf_grid td,
+.agenda td {
+  border-color: var(--border-table-primary);
+  background-color: var(--bg-homepage-table-row-primary);
+  color: var(--text-homepage-table-row);
+}
+
+table.leaf_grid th:hover,
+table.leaf_grid th:focus {
+  background-color: var(--bg-homepage-table-header-secondary);
+  color: var(--text-homepage-table-header);
+}
+
+.table_editable:hover {
+  background-color: var(--bg-homepage-table-header-hover-select);
+  color: var(--text-homepage-table-header);
+}
+table.leaf_grid tr td span.browsecounter a:hover {
+  color: var(--text-homepage-table-header);
+  background-color: var(--bg-homepage-table-header-hover-select);
+}
+
+.table_editable:hover a {
+  color: var(--text-homepage-table-header);
+  background-color: var(--bg-homepage-table-header-hover-select);
+}
+
+table.leaf_grid thead tr th, table.leaf_grid tbody tr td, table.leaf_grid tfoot tr td {
+    border-bottom: 1px solid var(--border-table-primary);
+    border-right: 1px solid var(--border-table-primary);
+    transition: filter 0.25s;
+}
+
+@media (prefers-color-scheme: dark) {
+  .table_priority:hover {
+    background-color: var(--bg-accent);
+  }
+}
+
+/* =============================================================================
+   BUTTONS AND INTERACTIVE ELEMENTS
+   ============================================================================= */
+.headerButton,
+button.headerButton,
+a.headerButton {
+  background-color: var(--menu-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--border-tertiary);
+}
+
+.headerButton:hover,
+.headerButton,
+.headerButton:focus,
+button.headerButton:hover,
+button.headerButton:focus {
+  background-color: var(--bg-homepage-table-header-hover-select);
+  color: var(--text-homepage-table-header);
+}
+
+.buttonNorm,
+button.buttonNorm {
+  background-color: var(--bg-button-primary);
+  color: var(--text-primary);
+  border-color: var(--border-table-primary);
+}
+
+.buttonNorm:hover,
+.buttonNormSelected,
+.buttonNorm:focus,
+button.buttonNorm:hover,
+button.buttonNorm:focus {
+  background-color: var(--bg-button-primary-hover);
+  color: var(--text-button-primary-hover);
+  border-color: var(--border-warning);
+}
+
+.button {
+  background-color: var(--menu-bg);
+  border-color: var(--border-primary);
+  color: var(--text-primary);
+}
+
+.button:hover {
+  background-color: var(--hover-bg);
+  color: var(--hover-text);
+}
+
+/* Menu Buttons */
+.menuButton,
+.menuButtonSmall {
+  background-color: var(--bg-secondary);
+  box-shadow: 0 2px 6px var(--shadow-color);
+}
+
+.menuButton:hover,
+.menuButton:focus,
+.menuButtonSmall:hover,
+.menuButtonSmall:focus {
+  box-shadow: 0 4px 6px var(--shadow-color);
+}
+
+/* Tool Buttons */
+button.tools {
+  background-color: var(--menu-bg);
+  border-color: var(--border-primary);
+  color: var(--text-primary);
+}
+
+button.tools:hover,
+button.tools:focus {
+  background-color: var(--hover-bg);
+  color: var(--hover-text);
+}
+
+/* Permission Buttons */
+.buttonPermission {
+  background-color: var(--bg-success);
+  border-color: var(--border-primary);
+  color: var(--text-primary);
+}
+
+.buttonPermission:hover,
+.buttonPermission:focus {
+  background-color: var(--hover-bg);
+  color: var(--hover-text);
+}
+
+#searchContainer.buttonNorm {
+  border: 1px solid;
+  background-color: var(--bg-button-primary);
+
+}
+
+span.leaf_check {
+  background-color: var()
+}
+
+/* =============================================================================
+   TOOLBARS AND NAVIGATION
+   ============================================================================= */
+
+.tools {
+  background-color: var(--toolbar-bg);
+  border-color: var(--border-primary);
+}
+
+.tools > div {
+  background-color: var(--menu-bg);
+  border-color: var(--border-primary);
+}
+
+.tools > div:hover,
+.tools > div:focus {
+  background-color: var(--hover-bg);
+  color: var(--hover-text);
+}
+
+#category_list {
+  background-color: var(--bg-accent);
+  border-color: var(--border-primary);
+}
+
+#category_list > div {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-primary);
+}
+
+#category_list > div:hover {
+  background-color: var(--hover-bg);
+  color: var(--hover-text);
+}
+/* =============================================================================
+   COMMENTS AND MESSAGING
+   ============================================================================= */
+
+#comments {
+  background-color: var(--comments-bg);
+  border-color: var(--border-primary);
+}
+
+#comments > div {
+  background-color: var(--comments-item-bg);
+  border-color: var(--border-primary);
+  color: var(--text-primary);
+}
+
+.comments_time {
+  color: var(--text-muted);
+}
+
+/* =============================================================================
+   FORMS AND SELECTORS
+   ============================================================================= */
+
+/* Employee Selector */
+.employeeSelector {
+  background-color: var(--menu-bg);
+  border-color: var(--border-primary);
+  color: var(--text-primary);
+}
+
+.employeeSelector:hover {
+  background-color: var(--hover-bg);
+  color: var(--hover-text);
+}
+
+.employeeSelected {
+  background-color: var(--hover-bg);
+  color: var(--hover-text);
+}
+
+.employeeSelectorTable {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-primary);
+}
+
+.employeeSelectorTable th {
+  background-color: var(--table-header-bg);
+  color: var(--text-primary);
+}
+
+.employeeSelectorTable td {
+  border-color: var(--border-primary);
+  background-color: var(--table-row-bg);
+  color: var(--text-primary);
+}
+
+/* Group Selector */
+.groupSelector {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-primary);
+  color: var(--text-primary);
+}
+
+.groupSelector:hover {
+  background-color: var(--bg-accent);
+}
+
+.groupSelected {
+  background-color: var(--hover-bg);
+  color: var(--hover-text);
+}
+
+.groupSelectorTable {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-tertiary);
+}
+
+.groupSelectorTable th {
+  background-color: var(--table-header-bg);
+  color: var(--text-muted);
+}
+
+.groupSelectorTable td {
+  border-color: var(--border-tertiary);
+  background-color: var(--table-row-bg);
+  color: var(--text-primary);
+}
+
+/* Position Selector */
+.positionSelector {
+  background-color: var(--menu-bg);
+  border-color: var(--border-primary);
+  color: var(--text-primary);
+}
+
+.positionSelector:hover {
+  background-color: var(--hover-bg);
+  color: var(--hover-text);
+}
+
+.positionSelected {
+  background-color: var(--hover-bg);
+  color: var(--hover-text);
+}
+
+.positionSelectorTable {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-primary);
+}
+
+.positionSelectorTable th {
+  background-color: var(--table-header-bg);
+  color: var(--text-muted);
+}
+
+.positionSelectorTable td {
+  border-color: var(--border-primary);
+  background-color: var(--table-row-bg);
+  color: var(--text-primary);
+}
+
+/* =============================================================================
+   SPECIALIZED COMPONENTS
+   ============================================================================= */
+
+/* Tags */
+.tags {
+  background-color: var(--bg-primary);
+  color: var(--text-muted);
+}
+
+@media (prefers-color-scheme: dark) {
+  .tags {
+    background-color: #111827;
+    color: #9ca3af;
+  }
+}
+
+.tags b {
+  color: var(--text-inverse);
+}
+
+.tags a:link,
+.tags a:visited {
+  color: var(--text-muted);
+}
+
+@media (prefers-color-scheme: dark) {
+  .tags a:link,
+  .tags a:visited {
+    color: #9ca3af;
+  }
+}
+
+.tags a:hover {
+  color: var(--text-link-hover);
+}
+
+@media (prefers-color-scheme: dark) {
+  .tags a:hover {
+    color: #fbbf24;
+  }
+}
+
+/* Cards */
+.card {
+  background-color: var(--bg-secondary);
+  box-shadow: 0 2px 6px var(--shadow-color);
+}
+
+/* Archived items */
+div.is-archived {
+  background-color: var(--bg-accent);
+}
+
+@media (prefers-color-scheme: dark) {
+  div.is-archived {
+    background-color: #374151;
+  }
+}
+
+/* Print Response (for sensitive data masking) */
+span.printResponse {
+  color: var(--text-primary);
+}
+
+.sensitiveIndicator-masked,
+.sensitiveIndicatorMaskToggle {
+  color: var(--text-primary);
+}
+
+/* =============================================================================
+   PRINTER-SPECIFIC OVERRIDES
+   ============================================================================= */
+
+@media print {
+  /* Force light colors for printing regardless of dark mode */
+  :root {
+    --bg-primary: white;
+    --bg-secondary: white;
+    --text-primary: black;
+    --border-primary: black;
+  }
+
+  body {
+    background-color: white;
+    color: black;
+  }
+
+  .positionSmall {
+    background-color: #caecff;
+  }
+
+  .groupSmall {
+    background-color: #f6cafd;
+  }
+
+  .employee {
+    background-color: #ffe3e3;
+  }
+}
+
+/* =============================================================================
+   FOOTER
+   ============================================================================= */
+
+#footer a:link,
+#footer a:visited {
+  color: var(--text-muted);
+}
+
+#footer a:hover {
+  color: var(--text-link-hover);
+}
+
+/* =============================================================================
+   SPECIAL DARK MODE ADJUSTMENTS
+   ============================================================================= */
+
+@media (prefers-color-scheme: dark) {
+  /* Ensure sufficient contrast for borders */
+  .positionSmall,
+  .groupSmall,
+  .employee,
+  .facility {
+    border-color: #6b7280;
+  }
+
+  /* Adjust shadows for dark backgrounds */
+  .menuButton,
+  .menuButtonSmall,
+  #maincontent {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+  }
+
+  /* Ensure form elements are visible */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  textarea,
+  select {
+    background-color: var(--bg-input-box-primary);
+    color: var(--border-warning);
+    border-color: #6b7280;
+  }
+
+  /* Loading modal adjustments */
+  .loading-modal {
+    background: rgba(17, 24, 39, 0.9);
+  }
+
+  /* Visual alert box */
+  #visual_alert_box {
+    background-color: #2d2d2d;
+    color: #e5e5e5;
+  }
+
+  /* Ensure link visibility in dark mode */
+  .link {
+    color: #60a5fa;
+  }
+
+  .link:hover {
+    color: #fbbf24;
+  }
+}
+
+/* =============================================================================
+   UTILITY CLASSES FOR REPLACING INLINE STYLES
+   Add these to your existing dark-mode.css file
+   ============================================================================= */
+
+/* Status and notification colors */
+.status-loading {
+    background-color: #fffcae;
+    padding: 4px;
+}
+
+.status-success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    padding: 4px;
+}
+
+.status-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    padding: 4px;
+}
+
+.status-warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+    padding: 4px;
+}
+
+/* Progress and completion colors */
+.progress-bg {
+    background-color: #feffd2;
+    padding: 4px;
+    border-bottom: 1px solid black;
+}
+
+.completion-bg {
+    background-color: #b74141;
+    color: white;
+    text-shadow: black 0.1em 0.1em 0.2em;
+    font-weight: bold;
+    text-align: center;
+    font-size: 120%;
+    padding: 8px;
+    margin: 0px;
+}
+
+/* Form field highlighting */
+.field-highlight {
+    background-color: #fffdc2;
+}
+
+.field-required {
+    background-color: #ffaeae;
+    font-weight: bold;
+    font-size: 120%;
+}
+
+/* File upload statuses */
+.file-status {
+    background-color: #fffcae;
+    padding: 4px;
+    font-weight: bolder;
+    margin-top: 0.2rem;
+    line-height: 1.6;
+}
+
+.file-row-even {
+    background-color: #e4f2ff;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+}
+
+.file-row-odd {
+    background-color: #d7e5ff;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+}
+
+/* Loading and processing */
+.loading-indicator {
+    background-color: white;
+    border: 2px solid black;
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    padding: 16px;
+    width: 95%;
+}
+
+/* Emergency/priority indicators */
+.priority-emergency {
+    background-color: #FF4040;
+    color: black;
+}
+
+.priority-normal {
+    background-color: transparent;
+}
+
+/* Record highlighting */
+.record-own {
+    background-color: #feffd1;
+}
+
+.record-new {
+    background-color: rgb(254, 255, 209);
+}
+
+/* =============================================================================
+   DARK MODE ADAPTATIONS FOR UTILITY CLASSES
+   ============================================================================= */
+
+@media (prefers-color-scheme: dark) {
+    .status-loading {
+        background-color: #4a4a00;
+        color: #e5e5e5;
+    }
+
+    .status-success {
+        background-color: #1f4b2b;
+        color: #9ae6b4;
+        border-color: #38a169;
+    }
+
+    .status-error {
+        background-color: #4a1f22;
+        color: #feb2b2;
+        border-color: #e53e3e;
+    }
+
+    .status-warning {
+        background-color: #4a3600;
+        color: #faf089;
+        border-color: #d69e2e;
+    }
+
+    .progress-bg {
+        background-color: #374151;
+        border-bottom-color: #6b7280;
+    }
+
+    .completion-bg {
+        background-color: #7f1d1d;
+        color: #fca5a5;
+    }
+
+    .field-highlight {
+        background-color: #4a5568;
+    }
+
+    .field-required {
+        background-color: #7f1d1d;
+        color: #fca5a5;
+    }
+
+    .file-status {
+        background-color: #4a4a00;
+        color: #e5e5e5;
+    }
+
+    .file-row-even {
+        background-color: #2d3748;
+    }
+
+    .file-row-odd {
+        background-color: #1a202c;
+    }
+
+    .loading-indicator {
+        background-color: #2d2d2d;
+        border-color: #6b7280;
+        color: #e5e5e5;
+    }
+
+    .priority-emergency {
+        background-color: #dc2626;
+        color: white;
+    }
+
+    .record-own {
+        background-color: #4a5568;
+    }
+
+    .record-new {
+        background-color: #4a5568;
+    }
+}
+
+/* =============================================================================
+   CSS ATTRIBUTE SELECTORS FOR AUTOMATIC INLINE STYLE HANDLING
+   These automatically improve inline styles without template changes
+   ============================================================================= */
+
+@media (prefers-color-scheme: dark) {
+    /* Handle common inline background colors */
+    [style*="background-color: #fffcae"],
+    [style*="background-color:#fffcae"] {
+        background-color: #4a4a00 !important;
+        color: #e5e5e5 !important;
+    }
+
+    [style*="background-color: #feffd2"],
+    [style*="background-color:#feffd2"] {
+        background-color: #374151 !important;
+    }
+
+    [style*="background-color: #b74141"],
+    [style*="background-color:#b74141"] {
+        background-color: #7f1d1d !important;
+        color: #fca5a5 !important;
+    }
+
+    [style*="background-color: #ffaeae"],
+    [style*="background-color:#ffaeae"] {
+        background-color: #7f1d1d !important;
+        color: #fca5a5 !important;
+    }
+
+    [style*="background-color: #fffdc2"],
+    [style*="background-color:#fffdc2"] {
+        background-color: #4a5568 !important;
+    }
+
+    [style*="background-color: #e4f2ff"],
+    [style*="background-color:#e4f2ff"] {
+        background-color: #2d3748 !important;
+    }
+
+    [style*="background-color: #d7e5ff"],
+    [style*="background-color:#d7e5ff"] {
+        background-color: #1a202c !important;
+    }
+
+    [style*="background-color: #feffd1"],
+    [style*="background-color:#feffd1"] {
+        background-color: #4a5568 !important;
+    }
+
+    [style*="background-color: rgb(254, 255, 209)"],
+    [style*="background-color:rgb(254, 255, 209)"] {
+        background-color: var(--bg-homepage-table-row-secondary) !important;
+    }
+
+    [style*="background-color: white"],
+    [style*="background-color:#fff"],
+    [style*="background-color: #ffffff"] {
+        background-color: #adadad !important;
+        color: #e5e5e5 !important;
+    }
+
+    /* Handle common inline text colors */
+    [style*="color: #c00"],
+    [style*="color:#c00"] {
+        color: #fca5a5 !important;
+    }
+
+    [style*="color: #d00"],
+    [style*="color:#d00"] {
+        color: #fca5a5 !important;
+    }
+
+    [style*="color: red"],
+    [style*="color:#ff0000"] {
+        color: #fca5a5 !important;
+    }
+
+    [style*="color: green"],
+    [style*="color:#008000"] {
+        color: #9ae6b4 !important;
+    }
+
+    [style*="color: #e00000"],
+    [style*="color:#e00000"] {
+        color: #d32030 !important;
+    }
+
+    [style*="color: black"],
+    [style*="color:#000"] {
+        color: #e5e5e5 !important;
+    }
+
+    /* Handle border colors */
+    [style*="border: 1px solid black"],
+    [style*="border:1px solid black"] {
+        border-color: var(--bg-secondary) !important;
+    }
+
+    [style*="border-bottom: 1px solid black"],
+    [style*="border-bottom:1px solid black"] {
+        border-bottom-color: #6b7280 !important;
+    }
+
+    [style*="border-top: 1px solid black"],
+    [style*="border-top:1px solid black"] {
+        border-top-color: #6b7280 !important;
+    }
+}

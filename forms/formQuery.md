@@ -84,7 +84,7 @@ Adds a new search term.
 Adds a new search term specifically for data tables.
 
 *   `id`: (string) Column ID or 'data' to search data table or 'dependencyID' to search records_dependencies data, matching on 'filled'. Must be one of the supported IDs listed below.
-*   `indicatorID`: (string) Indicator ID or dependency ID. Use "0" to search all indicators.
+*   `indicatorID`: (string) Indicator ID or dependency ID. Use "0" to search all indicators. Use "0.0" to search all indicators matching the orgchart_employee input format.
 *   `operator`: (string) The comparison operator. Must be one of the supported operators listed below.
 *   `match`: (string) The value to search for.
 *   `gate`: (string, optional, default: "AND") The logical gate ("AND" or "OR") to combine with the next term.

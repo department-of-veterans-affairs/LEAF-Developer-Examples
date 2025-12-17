@@ -110,7 +110,7 @@ const queryData = {
   joins: ['status'],
   getData: [1, 2, 3]
 };
-formQuery.importQuery(queryData);
+query.importQuery(queryData);
 ```
 ### `setLimit(offset, limit)`
 
@@ -122,8 +122,8 @@ Sets the query offset/limit based on MySQL offset and limit conventions.
 **Example:**
 
 ```javascript
-formQuery.setLimit(100, 20); // Fast-forward 100 records, and get 20 records.
-formQuery.setLimit(50); // Get the first 50 records
+query.setLimit(100, 20); // Fast-forward 100 records, and get 20 records.
+query.setLimit(50); // Get the first 50 records
 ```
 ### `setLimitOffset(offset)`
 
@@ -134,7 +134,7 @@ Sets the query limit offset.
 **Example:**
 
 ```javascript
-formQuery.setLimitOffset(25); // Skip the first 25 records
+query.setLimitOffset(25); // Skip the first 25 records
 ```
 ### `join(table)`
 
@@ -161,8 +161,8 @@ Adds a table to join to the query.
 **Example:**
 
 ```javascript
-formQuery.join('service'); // Join the services table
-formQuery.join('status'); // Join the status table
+query.join('service'); // Join the services table
+query.join('status'); // Join the status table
 ```
 ### `getData(indicatorID)`
 
@@ -173,8 +173,8 @@ Includes data associated with an indicator ID in the result set.
 **Example:**
 
 ```javascript
-formQuery.getData(123); // Include data for indicator ID 123
-formQuery.getData([1, 2, 3]); // Include data for indicator IDs 1, 2, and 3
+query.getData(123); // Include data for indicator ID 123
+query.getData([1, 2, 3]); // Include data for indicator IDs 1, 2, and 3
 ```
 ### `sort(column, direction)`
 
@@ -186,8 +186,8 @@ Sorts the results.
 **Example:**
 
 ```javascript
-formQuery.sort('date', 'ASC'); // Sort by date in ascending order
-formQuery.sort('title'); // Sort by title in descending order (default)
+query.sort('date', 'ASC'); // Sort by date in ascending order
+query.sort('title'); // Sort by title in descending order (default)
 ```
 ### `updateTerm(id, operator, match, gate)`
 
@@ -201,7 +201,7 @@ Updates an existing search term.
 **Example:**
 
 ```javascript
-formQuery.updateTerm('title', '=', 'New Example Title', 'AND'); // Update the title term
+query.updateTerm('title', '=', 'New Example Title', 'AND'); // Update the title term
 ```
 ### `updateDataTerm(id, indicatorID, operator, match, gate)`
 
@@ -216,7 +216,7 @@ Updates an existing data search term.
 **Example:**
 
 ```javascript
-formQuery.updateDataTerm('data', 0, '=', 'New Data Value', 'AND'); // Update the data term
+query.updateDataTerm('data', 0, '=', 'New Data Value', 'AND'); // Update the data term
 ```
 ### `setExtraParams(params)`
 
@@ -227,7 +227,7 @@ Adds extra parameters to the end of the query API URL.
 **Example:**
 
 ```javascript
-formQuery.setExtraParams('&x-filterData=title'); // data filter limits responses to only show titles
+query.setExtraParams('&x-filterData=title'); // data filter limits responses to only show titles
 ```
 ### `setRootURL(url)`
 
@@ -238,7 +238,7 @@ Sets the root URL for the API endpoint.
 **Example:**
 
 ```javascript
-formQuery.setRootURL('https://leaf.va.gov/Academy/Demo1'); // Set the root URL
+query.setRootURL('https://leaf.va.gov/Academy/Demo1'); // Set the root URL
 ```
 ### `onSuccess(funct)`
 
@@ -249,7 +249,7 @@ Sets a success callback function.
 **Example:**
 
 ```javascript
-formQuery.onSuccess(function(result) {
+query.onSuccess(function(result) {
   console.log('Query successful:', result);
 });
 ```
@@ -262,7 +262,7 @@ Sets a progress callback function.
 **Example:**
 
 ```javascript
-formQuery.onProgress(function(progress) {
+query.onProgress(function(progress) {
   console.log('Query progress:', progress);
 });
 ```
@@ -276,7 +276,7 @@ Sets an [AbortSignal](https://developer.mozilla.org/en-US/docs/Web/API/AbortSign
 
 ```javascript
 const abortController = new AbortController();
-formQuery.setAbortSignal(abortController.signal);
+query.setAbortSignal(abortController.signal);
 
 // Later, to abort the query:
 abortController.abort();
@@ -290,7 +290,7 @@ The structure of the query response is defined here: https://github.com/departme
 **Example:**
 
 ```javascript
-formQuery.execute()
+query.execute()
   .then(function(result) {
     console.log('Query result:', result);
   })
